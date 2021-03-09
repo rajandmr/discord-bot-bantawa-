@@ -278,7 +278,7 @@ you can react on right to create your character or wrong to cancel`
                         const canvas = Canvas.createCanvas(800, 740);
 
                         const ctx = canvas.getContext('2d');
-                        let backgroundUrl = profile[0].ImageUrl==='X-URL?'?'./wallpaper.jpg':profile[0].ImageUrl
+                        let backgroundUrl = profile[0].ImageUrl==='X-URL'?'./wallpaper.jpg':profile[0].ImageUrl
                         const background = await Canvas.loadImage(backgroundUrl);
                         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
