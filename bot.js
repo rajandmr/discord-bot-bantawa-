@@ -1,7 +1,12 @@
-require('dotenv').config()
+require('dotenv').config();
+require('./db');
+
+const ProfileModel = require('./model/profile')
 
 
-const { Client, UserFlags, MessageAttachment, VoiceBroadcast, VoiceChannel } = require('discord.js');
+const { Client, MessageAttachment } = require('discord.js');
+
+const Canvas = require('canvas');
 
 const client = new Client();
 
@@ -107,7 +112,7 @@ client.on('message', async (message) => {
 
 
     try {
-        if (message.content.startsWith(prefix || prefix2 || prefix3 || prefix4)) {
+        if (message.content.startsWith(prefix) || message.content.startsWith(prefix2) || message.content.startsWith(prefix3) || message.content.startsWith(prefix4)) {
             const args = message.content.slice(prefix.length).trim().split(/ +/g);
             const command = args.shift();
             if (command === 'play') {
@@ -154,8 +159,196 @@ client.on('message', async (message) => {
                 if (a === 2) {
                     message.channel.send('paxi geet sunne bela bolau')
                 }
-                
+
             }
+
+            if (command === 'flip') {
+                var a = Math.floor(Math.random() * 2);
+                if (a === 0) {
+                    message.channel.send(`>>> ***Heads*** aayo kta ho :exploding_head: `)
+                }
+                if (a === 1) {
+
+                    message.channel.send(`>>> la thik xa ***Tails*** raixa :cocktail: `)
+                }
+            }
+
+            if (command === 'check') {
+                message.channel.send(`${message.author.tag}`)
+            }
+
+            if (command === 'create') {
+                if (!args.length) return message.channel.send('character ko name ni chaiyo');
+                ProfileModel.find({
+                    Tag: message.author.tag
+                }, (err, profile) => {
+                    if (err) {
+                        return message.channel.send('database problem aayo feri try gara hai sathi')
+                    }
+                    else if (profile.length !== 0) {
+                        console.log(profile)
+                        return message.channel.send(`tmro character already raixa ta sathi **${profile[0].Name}** vanne. delete garne vaye use ***bantaba delete*** ani feri banau`)
+                    }
+                    else {
+                        const Username = message.author.username;
+                        const Tag = message.author.tag;
+                        const UserId = message.author.id;
+                        const Name = args.join(" ").toLowerCase();
+                        let msg = `>>> your character name is **${Name}**
+your **Race** will be selected as random.
+you can react on right to create your character or wrong to cancel`
+
+                        message.channel.send(msg).then(message => {
+                            message.react('✅')
+                            message.react('❎');
+                            client.on('messageReactionAdd', (reaction, user) => {
+                                if (user.bot) {
+                                    return
+                                }
+                                if (reaction.emoji.name === '✅') {
+                                    if (user.id === UserId) {
+                                        const newProfile = new ProfileModel({});
+                                        newProfile.Name = Name;
+                                        newProfile.UserId = UserId;
+                                        newProfile.Tag = Tag;
+                                        newProfile.UserName = Username;
+                                        newProfile.Race = 'KothiWala'
+                                        newProfile.save((err, saved) => {
+                                            if (err) {
+                                                message.delete()
+                                                message.channel.send('database ma rakhnu ma kharabi aayo paxi try garnu hola')
+                                            } else {
+                                                message.delete()
+                                                message.channel.send(`aja dekhi tmro name ${Name} yaad rakha natra ***bantaba profile*** garera hera`)
+                                            }
+
+                                        })
+                                    }
+                                }
+
+
+                                if (reaction.emoji.name === '❎') {
+                                    if (user.id === UserId) {
+                                        message.delete()
+                                        message.channel.send('arko pali banau hai dost aile lai nabanayeni')
+                                    }
+                                }
+                            })
+                        })
+                            .catch(e => console.log(e))
+                    }
+
+
+
+                })
+
+            }
+            if (command === 'laugh') {
+                message.react('😂')
+            }
+            if (command === 'angry') {
+                message.react('😡')
+            }
+            if (command === 'sad') {
+                message.react('😔')
+            }
+            if (command === 'sleep') {
+                message.react('😴')
+            }
+            if (command === 'clap') {
+                message.react('👏')
+            }
+            if (command === 'ok') {
+                message.react('👍')
+            }
+
+
+            if (command === 'profile') {
+                ProfileModel.find({
+                    Tag: message.author.tag
+                }).then(async (profile) => {
+
+
+                    try {
+                        if(!profile[0]){
+                            return message.channel.send('character banau suruma use ***bantaba create <name>***')
+                        }
+                        const canvas = Canvas.createCanvas(800, 740);
+
+                        const ctx = canvas.getContext('2d');
+                        const background = await Canvas.loadImage('./wallpaper.jpg');
+                        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+                        ctx.strokeStyle = '#0933ad';
+                        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+                        ctx.font = applyText(canvas, profile[0].Name)
+                        ctx.fillStyle = '#433f4a';
+                        ctx.fillText(`Name: ${profile[0].Name}`, 250, 100);
+                        ctx.fillText(`Race: ${profile[0].Race}`, 250, 170);
+                        ctx.fillText(`$${profile[0].Gold}`,360,250);
+                        ctx.fillText(`Guild: ${profile[0].Guild}`,50,350);
+                        ctx.fillText(`Lvl: ${profile[0].Level}`,50,420);
+                        ctx.fillText(`Tag: ${profile[0].Tag}`,50,490);
+                        ctx.fillText(`Status: ${profile[0].Status}`,50,560);
+                        ctx.fillText(`ATK: ${profile[0].Attack}`,300,420)
+                        ctx.fillText(`DEF: ${profile[0].Defense}`,550,420);
+                        ctx.fillText(`GOD: ${profile[0].God}`,50,630);
+                        ctx.fillText(`Married: ${profile[0].IsMarried}`,50,700);
+                        
+
+
+                        const goldBagUrl= 'https://cdn.imgbin.com/17/2/9/imgbin-money-bag-money-bag-gold-coin-lakshmi-gold-coin-4R7yB5ZRN4q58X9CNLG21yvHe.jpg'
+                        const goldBag = await Canvas .loadImage(goldBagUrl);
+                        ctx.drawImage(goldBag, 270,200,70,70);
+
+                        // Pick up the pen
+                        ctx.beginPath();
+                        // Start the arc to form a circle
+                        ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
+                        // Put the pen down
+                        ctx.closePath();
+                        // Clip off the region you drew on
+                        ctx.clip();
+
+                        const avatar = await Canvas.loadImage(message.author.displayAvatarURL({ format: 'jpg' }));
+                        ctx.drawImage(avatar, 25, 25, 200, 200);
+
+                    
+
+                       
+                        const attachment = new MessageAttachment(canvas.toBuffer(), 'profile-image.png');
+
+                        message.channel.send(`Your name: **${profile[0].Name}**`, attachment);
+                    } catch (e) {
+                        console.log(e)
+                    }
+
+                }).catch(e => {
+                    console.log(e)
+                })
+            }
+
+            if (command === 'delete') {
+                ProfileModel.find({
+                    Tag: message.author.tag
+                }).then(profile => {
+                    if (profile[0]) {
+                        profile[0].remove((err, removed) => {
+                            if (err) {
+                                console.log(err)
+                            } else {
+                                message.channel.send('la udyo character aba feri banau')
+                            }
+                        })
+                    } else {
+                        message.channel.send('character nai xaina k ko delete ho baru banau ***bantaba create tmroname*** garera')
+                    }
+                }).catch(e => {
+                    console.log(e)
+                })
+            }
+
         }
     }
     catch (e) {
@@ -170,10 +363,39 @@ client.on('message', async (message) => {
 
 })
 
-client.on('messageDelete',(message)=>{
-    message.channel.send(`message naudau na ${message.author.username} dost`)
+
+
+
+
+
+client.on('guildMemberAdd', (member) => {
+    const channelId = '816676404879556621';
+    const channel = member.guild.channels.cache.get(channelId)
+
+    const message = `<@${member.id}> dost welcome welcome la aba ramailo garna parxa`;
+
+    channel.send(message);
+
+
+
 })
 
+
+const applyText = (canvas, text) => {
+	const ctx = canvas.getContext('2d');
+
+	// Declare a base size of the font
+	let fontSize = 50;
+
+	do {
+		// Assign the font to the context and decrement it so it can be measured again
+		ctx.font = `${fontSize -= 10}px Lucida Handwriting`;
+		// Compare pixel width of the text to the canvas minus the approximate avatar size
+	} while (ctx.measureText(text).width > canvas.width - 300);
+
+	// Return the result to use in the actual canvas
+	return ctx.font;
+};
 
 
 
