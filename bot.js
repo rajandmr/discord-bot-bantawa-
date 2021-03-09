@@ -312,14 +312,14 @@ you can react on right to create your character or wrong to cancel`
                         ctx.clip();
 
                         const avatar = await Canvas.loadImage(message.author.displayAvatarURL({ format: 'jpg' }));
-                        ctx.drawImage(avatar, 25, 25, 200, 200);
+                        ctx.drawImage(avatar, 50, 50, 200, 200);
 
                     
 
                        
                         const attachment = new MessageAttachment(canvas.toBuffer(), 'profile-image.png');
 
-                        message.channel.send(`Your name: **${profile[0].Name}**`, attachment);
+                        message.channel.send(attachment);
                     } catch (e) {
                         console.log(e)
                     }
@@ -389,7 +389,7 @@ const applyText = (canvas, text) => {
 
 	do {
 		// Assign the font to the context and decrement it so it can be measured again
-		ctx.font = `${fontSize -= 10}px Lucida Handwriting`;
+		ctx.font = `${fontSize -= 10}px ${process.env.FONT}`;
 		// Compare pixel width of the text to the canvas minus the approximate avatar size
 	} while (ctx.measureText(text).width > canvas.width - 300);
 
