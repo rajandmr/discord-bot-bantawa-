@@ -187,7 +187,7 @@ client.on('message', async (message) => {
                     }
                     else if (profile.length !== 0) {
                         console.log(profile)
-                        return message.channel.send(`tmro character already raixa ta sathi **${profile[0].Name}** vanne. delete garne vaye use ***bantaba delete*** ani feri banau`)
+                        return message.channel.send(`tmro character already raixa ta sathi **${profile[0].Name}** vanne. name edit garne vaye use ***bantaba edit <newName>*** `)
                     }
                     else {
                         const Username = message.author.username;
@@ -270,7 +270,7 @@ you can react on right to create your character or wrong to cancel`
 
 
                     try {
-                        if(!profile[0]){
+                        if (!profile[0]) {
                             return message.channel.send('character banau suruma use ***bantaba create <name>***')
                         }
                         const canvas = Canvas.createCanvas(800, 740);
@@ -286,21 +286,21 @@ you can react on right to create your character or wrong to cancel`
                         ctx.fillStyle = '#433f4a';
                         ctx.fillText(`Name: ${profile[0].Name}`, 250, 100);
                         ctx.fillText(`Race: ${profile[0].Race}`, 250, 170);
-                        ctx.fillText(`$${profile[0].Gold}`,360,250);
-                        ctx.fillText(`Guild: ${profile[0].Guild}`,50,350);
-                        ctx.fillText(`Lvl: ${profile[0].Level}`,50,420);
-                        ctx.fillText(`Tag: ${profile[0].Tag}`,50,490);
-                        ctx.fillText(`Status: ${profile[0].Status}`,50,560);
-                        ctx.fillText(`ATK: ${profile[0].Attack}`,300,420)
-                        ctx.fillText(`DEF: ${profile[0].Defense}`,550,420);
-                        ctx.fillText(`GOD: ${profile[0].God}`,50,630);
-                        ctx.fillText(`Married: ${profile[0].IsMarried}`,50,700);
-                        
+                        ctx.fillText(`$${profile[0].Gold}`, 360, 250);
+                        ctx.fillText(`Guild: ${profile[0].Guild}`, 50, 350);
+                        ctx.fillText(`Lvl: ${profile[0].Level}`, 50, 420);
+                        ctx.fillText(`Tag: ${profile[0].Tag}`, 50, 490);
+                        ctx.fillText(`Status: ${profile[0].Status}`, 50, 560);
+                        ctx.fillText(`ATK: ${profile[0].Attack}`, 300, 420)
+                        ctx.fillText(`DEF: ${profile[0].Defense}`, 550, 420);
+                        ctx.fillText(`GOD: ${profile[0].God}`, 50, 630);
+                        ctx.fillText(`Married: ${profile[0].IsMarried}`, 50, 700);
 
 
-                        const goldBagUrl= 'https://cdn.imgbin.com/17/2/9/imgbin-money-bag-money-bag-gold-coin-lakshmi-gold-coin-4R7yB5ZRN4q58X9CNLG21yvHe.jpg'
-                        const goldBag = await Canvas .loadImage(goldBagUrl);
-                        ctx.drawImage(goldBag, 270,200,70,70);
+
+                        const goldBagUrl = 'https://cdn.imgbin.com/17/2/9/imgbin-money-bag-money-bag-gold-coin-lakshmi-gold-coin-4R7yB5ZRN4q58X9CNLG21yvHe.jpg'
+                        const goldBag = await Canvas.loadImage(goldBagUrl);
+                        ctx.drawImage(goldBag, 270, 200, 70, 70);
 
                         // Pick up the pen
                         ctx.beginPath();
@@ -314,9 +314,9 @@ you can react on right to create your character or wrong to cancel`
                         const avatar = await Canvas.loadImage(message.author.displayAvatarURL({ format: 'jpg' }));
                         ctx.drawImage(avatar, 25, 25, 200, 200);
 
-                    
 
-                       
+
+
                         const attachment = new MessageAttachment(canvas.toBuffer(), 'profile-image.png');
 
                         message.channel.send(attachment);
@@ -329,24 +329,27 @@ you can react on right to create your character or wrong to cancel`
                 })
             }
 
-            if (command === 'delete') {
-                ProfileModel.find({
+            if (command === 'edit') {
+                if (!args.length) return message.channel.send('newName ni deu sathi chado');
+                ProfileModel.findOne({
                     Tag: message.author.tag
-                }).then(profile => {
-                    if (profile[0]) {
-                        profile[0].remove((err, removed) => {
+                }).exec().then(profile => {
+                    if (profile) {
+                        const oldName = profile.Name;
+                        const newName = args.join(" ");
+                        profile.Name = newName
+                        profile.save((err, saved) => {
                             if (err) {
-                                console.log(err)
-                            } else {
-                                message.channel.send('la udyo character aba feri banau')
+                                console.log(err);
+                            }
+                            else {
+                                message.channel.send(`tmro name **${oldName}** bata aba **${saved.Name}** vayo la moj gara`)
                             }
                         })
                     } else {
-                        message.channel.send('character nai xaina k ko delete ho baru banau ***bantaba create tmroname*** garera')
+                        message.channel.send('xaina profile nai k ko edit hau')
                     }
-                }).catch(e => {
-                    console.log(e)
-                })
+                }).catch(e => console.log(e))
             }
 
         }
@@ -382,19 +385,19 @@ client.on('guildMemberAdd', (member) => {
 
 
 const applyText = (canvas, text) => {
-	const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
-	// Declare a base size of the font
-	let fontSize = process.env.FONT_SIZE;
+    // Declare a base size of the font
+    let fontSize = process.env.FONT_SIZE;
 
-	do {
-		// Assign the font to the context and decrement it so it can be measured again
-		ctx.font = `${fontSize -= 10}px ${process.env.FONT}`;
-		// Compare pixel width of the text to the canvas minus the approximate avatar size
-	} while (ctx.measureText(text).width > canvas.width - 300);
+    do {
+        // Assign the font to the context and decrement it so it can be measured again
+        ctx.font = `${fontSize -= 10}px ${process.env.FONT}`;
+        // Compare pixel width of the text to the canvas minus the approximate avatar size
+    } while (ctx.measureText(text).width > canvas.width - 300);
 
-	// Return the result to use in the actual canvas
-	return ctx.font;
+    // Return the result to use in the actual canvas
+    return ctx.font;
 };
 
 
