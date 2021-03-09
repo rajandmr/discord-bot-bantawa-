@@ -49,6 +49,10 @@ const ProfileSchema = new Mongoose.Schema({
     IsMarried:{
         type: String,
         default: 'Not Married'
+    },
+    ImageUrl:{
+        type: String,
+        default: 'X-URL'
     }
 },
 {

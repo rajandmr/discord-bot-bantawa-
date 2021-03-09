@@ -8,6 +8,8 @@ const { Client, MessageAttachment } = require('discord.js');
 
 const Canvas = require('canvas');
 
+const isImageURL = require('image-url-validator').default;
+
 const client = new Client();
 
 
@@ -276,7 +278,8 @@ you can react on right to create your character or wrong to cancel`
                         const canvas = Canvas.createCanvas(800, 740);
 
                         const ctx = canvas.getContext('2d');
-                        const background = await Canvas.loadImage('./wallpaper.jpg');
+                        let backgroundUrl = profile[0].ImageUrl==='X-URL?'?'./wallpaper.jpg':profile[0].ImageUrl
+                        const background = await Canvas.loadImage(backgroundUrl);
                         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
                         ctx.strokeStyle = '#0933ad';
@@ -350,6 +353,34 @@ you can react on right to create your character or wrong to cancel`
                         message.channel.send('xaina profile nai k ko edit hau')
                     }
                 }).catch(e => console.log(e))
+            }
+
+            if(command==='image'){
+                if(!args.length){
+                    return message.channel.send('image ko url ni deu sathi')
+                }
+                const url = args.join(" ");
+                
+                if(await isImageURL(url)){
+                    ProfileModel.findOne({
+                        Tag: message.author.tag
+                    }).then(profile=>{
+                        if(profile){
+                            profile.ImageUrl = url
+                            profile.save((err,saved)=>{
+                                if(err){
+                                    console.log(err)
+                                }else{
+                                    message.channel.send('image set gariyo aba ***bantaba profile*** garera check gara')
+                                }
+                            })
+                        }else{
+                            message.channel.send('profile banau suruma')
+                        }
+                    }).catch(e=>console.log(e))
+                }else{
+                    message.channel.send('image ko url valid xaina sathi thik url pathau hai natra hudeina')
+                }
             }
 
         }
