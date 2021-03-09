@@ -312,7 +312,7 @@ you can react on right to create your character or wrong to cancel`
                         ctx.clip();
 
                         const avatar = await Canvas.loadImage(message.author.displayAvatarURL({ format: 'jpg' }));
-                        ctx.drawImage(avatar, 50, 50, 200, 200);
+                        ctx.drawImage(avatar, 25, 25, 200, 200);
 
                     
 
