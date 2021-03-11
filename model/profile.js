@@ -53,7 +53,8 @@ const ProfileSchema = new Mongoose.Schema({
     ImageUrl:{
         type: String,
         default: 'X-URL'
-    }
+    },
+    SteamID: String
 },
 {
     timestamps: true

@@ -1,10 +1,14 @@
 require('dotenv').config();
 require('./db');
+const moment = require('moment')
 
 const ProfileModel = require('./model/profile')
 
+const game_mode = require('./game_mode');
+const lobby_type = require('./lobby_type');
+const heroes = require('./heroes');
 
-const { Client, MessageAttachment } = require('discord.js');
+const { Client, MessageAttachment, MessageEmbed, MessageFlags } = require('discord.js');
 
 const Canvas = require('canvas');
 
@@ -12,6 +16,8 @@ const isImageURL = require('image-url-validator').default;
 
 const client = new Client();
 
+
+const Axios = require('axios');
 
 
 
@@ -278,7 +284,7 @@ you can react on right to create your character or wrong to cancel`
                         const canvas = Canvas.createCanvas(800, 740);
 
                         const ctx = canvas.getContext('2d');
-                        let backgroundUrl = profile[0].ImageUrl==='X-URL'?'./wallpaper.jpg':profile[0].ImageUrl
+                        let backgroundUrl = profile[0].ImageUrl === 'X-URL' ? './wallpaper.jpg' : profile[0].ImageUrl
                         const background = await Canvas.loadImage(backgroundUrl);
                         ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
@@ -298,6 +304,9 @@ you can react on right to create your character or wrong to cancel`
                         ctx.fillText(`DEF: ${profile[0].Defense}`, 550, 420);
                         ctx.fillText(`GOD: ${profile[0].God}`, 50, 630);
                         ctx.fillText(`Married: ${profile[0].IsMarried}`, 50, 700);
+                        if(profile[0].SteamID){
+                            ctx.fillText(`Steam ID: ${profile[0].SteamID}`, 250, 630);
+                        }
 
 
 
@@ -355,32 +364,201 @@ you can react on right to create your character or wrong to cancel`
                 }).catch(e => console.log(e))
             }
 
-            if(command==='image'){
-                if(!args.length){
+            if (command === 'image') {
+                if (!args.length) {
                     return message.channel.send('image ko url ni deu sathi')
                 }
                 const url = args.join(" ");
-                
-                if(await isImageURL(url)){
+
+                if (await isImageURL(url)) {
                     ProfileModel.findOne({
                         Tag: message.author.tag
-                    }).then(profile=>{
-                        if(profile){
+                    }).then(profile => {
+                        if (profile) {
                             profile.ImageUrl = url
-                            profile.save((err,saved)=>{
-                                if(err){
+                            profile.save((err, saved) => {
+                                if (err) {
                                     console.log(err)
-                                }else{
+                                } else {
                                     message.channel.send('image set gariyo aba ***bantaba profile*** garera check gara')
                                 }
                             })
-                        }else{
+                        } else {
                             message.channel.send('profile banau suruma')
                         }
-                    }).catch(e=>console.log(e))
-                }else{
+                    }).catch(e => console.log(e))
+                } else {
                     message.channel.send('image ko url valid xaina sathi thik url pathau hai natra hudeina')
                 }
+            }
+            if (command === 'dota') {
+                if (!args.length) {
+                    return message.channel.send('steam id deu sathi')
+                }
+                const id = args.join(" ")
+                Axios.get(`https://api.opendota.com/api/players/${id}`)
+                    .then((data) => {
+                        if (typeof data.data.profile !== 'object') return message.channel.send('vetena tmro profile sathi data publicly expose gara dota kholera')
+                        const dota2Profile = new MessageEmbed()
+                            .setColor('#0099ff')
+                            .setTitle('Dota 2')
+                            .setAuthor(`${data.data.profile.personaname}`, `${data.data.profile.avatar}`)
+                            .addFields(
+                                { name: 'MMR', value: `${data.data.mmr_estimate.estimate}` },
+
+                            )
+                            .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+
+                        message.channel.send(dota2Profile)
+                    })
+                    .catch(e => console.log(e))
+
+            }
+
+            if (command === 'dota2') {
+                if (!args.length) {
+
+                    return message.channel.send('type **bantaba dota2 match 1** type match 1 for latest game ani tespaxi ko game haru chaiyo vane match2 kita match 3 number badaudei jau')
+                }
+                if (args[0] === 'match') {
+                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                    if(!user.SteamID){
+                        return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
+                    }
+                    const id = user.SteamID;
+                    args.shift();
+                    if (!args.length) {
+                        return message.channel.send('number xutexa numbber deu 1 to 100 samma matra')
+                    }
+                    const matchNumber = args[0];
+                    if (matchNumber >= 1 && matchNumber <= 100) {
+
+
+                        const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
+                        const author = await Axios.get(`https://api.opendota.com/api/players/${id}`);
+
+                        const stat = data[matchNumber - 1];
+                        const heroId = stat.hero_id;
+                        const player_slot = stat.player_slot;
+                        const radiant_win = stat.radiant_win;
+                    
+                        const duration = moment.utc(stat.duration*1000).format('H:mm:ss');
+                        let result = ''
+                        let Team = ''
+                        if(player_slot>=0&&player_slot<=127){
+                            Team = 'Radiant'
+                            if(radiant_win){
+                                result = 'Win'
+                            }else{
+                                result = 'Loss'
+                            }
+                        }else{
+                            Team= 'Dire'
+                            if(radiant_win){
+                                result ='Loss'
+                            }else{
+                                result='Win'
+                            }
+                        }
+                        
+                        let heroName = ''
+                        heroes.map(hero => {
+                            if (hero.id === heroId) {
+                                heroName = hero.localized_name
+                            }
+                        })
+
+                        let partysize ='';
+                        if(stat.party_size === 1){
+                            partysize='solo queue'
+                        }else{
+                            partysize = `${stat.party_size} man party`
+                        }
+                        const lobby= stat.lobby_type;
+                        const game = stat.game_mode;
+                        const personaname = author.data.profile.personaname;
+                        const avatar = author.data.profile.avatar;
+                        const dota2stats = new MessageEmbed()
+                            .setColor('#ad1005')
+                            .setTitle('Dota 2')
+                            .setAuthor(personaname, avatar)
+                            .setDescription(`Played as **${heroName}**`)
+
+                            .addFields(
+                                {name: lobby_type[lobby].name, value:`${game_mode[game].name}`},
+                                { name: 'Team', value: `**${Team}** (${result})` },
+                                { name: 'Kills', value: stat.kills, inline: true },
+                                { name: 'Deaths', value: stat.deaths, inline: true },
+                                { name: 'Assists', value: stat.assists, inline: true }
+                            )
+                            .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+                            .addFields(
+                                {name:'Duration', value: duration, inline:true},
+                                {name:'Party type',value: partysize,inline:true},
+                                {name:'Leaver', value:stat.leaver_status?'leaver detected':'no leavers',inline:true}
+                            )
+                            
+
+
+                        message.channel.send(dota2stats)
+                    }
+                    else {
+                        message.channel.send("recent 10 ota game ko matra stat vanxu ma")
+                    }
+                }
+            }
+            if (command === 'embed') {
+                const exampleEmbed = new MessageEmbed()
+                    .setColor('#0099ff')
+                    .setTitle('Some title')
+                    .setURL('https://discord.js.org/')
+                    .setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
+                    .setDescription('Some description here')
+                    .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+                    .addFields(
+                        { name: 'Regular field title', value: 'Some value here' },
+                        { name: '\u200B', value: '\u200B' },
+                        { name: 'Inline field title', value: 'Some value here', inline: true },
+                        { name: 'Inline field title', value: 'Some value here', inline: true },
+                    )
+                    .addField('Inline field title', 'Some value here', true)
+                    .setImage('https://i.imgur.com/wSTFkRM.png')
+                    .setTimestamp()
+                    .setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
+
+                message.channel.send(exampleEmbed)
+            }
+            if (command === 'steam') {
+                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const steamId = args.join(" ");
+                user.SteamID = steamId;
+                await user.save();
+                message.channel.send('Steam id set gariyo steam profile herne vaye use ***bantaba mmr***');
+            }
+
+            if (command === 'mmr') {
+                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                if(!user.SteamID){
+                    return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
+                }
+                const id = user.SteamID;
+                const data = await Axios.get(`https://api.opendota.com/api/players/${id}`);
+
+                if (typeof data.data.profile !== 'object') return message.channel.send('vetena tmro profile sathi data publicly expose gara dota kholera')
+                const dota2Profile = new MessageEmbed()
+                    .setColor('#0099ff')
+                    .setTitle('Dota 2')
+                    .setAuthor(`${data.data.profile.personaname}`, `${data.data.profile.avatar}`)
+                    .addFields(
+                        { name: 'MMR', value: `${data.data.mmr_estimate.estimate}` },
+
+                    )
+                    .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+
+                message.channel.send(dota2Profile);
+
+
+
             }
 
         }
