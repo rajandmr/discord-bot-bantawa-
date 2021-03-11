@@ -305,7 +305,7 @@ you can react on right to create your character or wrong to cancel`
                         ctx.fillText(`GOD: ${profile[0].God}`, 50, 630);
                         ctx.fillText(`Married: ${profile[0].IsMarried}`, 50, 700);
                         if(profile[0].SteamID){
-                            ctx.fillText(`Steam ID: ${profile[0].SteamID}`, 250, 630);
+                            ctx.fillText(`Steam ID: ${profile[0].SteamID}`, 360, 630);
                         }
 
 
@@ -431,7 +431,7 @@ you can react on right to create your character or wrong to cancel`
                         return message.channel.send('number xutexa numbber deu 1 to 100 samma matra')
                     }
                     const matchNumber = args[0];
-                    if (matchNumber >= 1 && matchNumber <= 100) {
+                    if (matchNumber >= 1 && matchNumber <= 2000) {
 
 
                         const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
