@@ -431,13 +431,16 @@ you can react on right to create your character or wrong to cancel`
                         return message.channel.send('number xutexa numbber deu 1 to 100 samma matra')
                     }
                     const matchNumber = args[0];
-                    if (matchNumber >= 1 && matchNumber <= 2000) {
+                    if (matchNumber >= 1 && matchNumber <= 10000) {
 
 
                         const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
                         const author = await Axios.get(`https://api.opendota.com/api/players/${id}`);
 
                         const stat = data[matchNumber - 1];
+                        if(!stat){
+                            return message.channel.send('dherei purano game raixa vetindeina yesko dost')
+                        }
                         const heroId = stat.hero_id;
                         const player_slot = stat.player_slot;
                         const radiant_win = stat.radiant_win;
@@ -461,10 +464,14 @@ you can react on right to create your character or wrong to cancel`
                             }
                         }
                         
-                        let heroName = ''
+                        let heroName = '';
+                        let heroImage= 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
                         heroes.map(hero => {
                             if (hero.id === heroId) {
                                 heroName = hero.localized_name
+                                if(hero.url_full_portrait){
+                                    heroImage=hero.url_full_portrait
+                                }
                             }
                         })
 
@@ -491,7 +498,7 @@ you can react on right to create your character or wrong to cancel`
                                 { name: 'Deaths', value: stat.deaths, inline: true },
                                 { name: 'Assists', value: stat.assists, inline: true }
                             )
-                            .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+                            .setThumbnail(heroImage)
                             .addFields(
                                 {name:'Duration', value: duration, inline:true},
                                 {name:'Party type',value: partysize,inline:true},
@@ -503,7 +510,7 @@ you can react on right to create your character or wrong to cancel`
                         message.channel.send(dota2stats)
                     }
                     else {
-                        message.channel.send("recent 2000 ota game ko matra stat vanxu ma")
+                        message.channel.send("recent 10000 ota game ko matra stat vanxu ma")
                     }
                 }
                 if(args[0]==='hero'){
@@ -513,11 +520,16 @@ you can react on right to create your character or wrong to cancel`
                     const matchNumber = args[size-1];
                   
                     args.pop();
-                    const heroName = args.join(" ")
+                    let heroName = args.join(" ")
                     let heroId;
+                    let heroImage= 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
                     heroes.map(hero=>{
                         if(hero.localized_name.toLowerCase()===heroName){
                             heroId = hero.id;
+                            heroName = hero.localized_name
+                            if(hero.url_full_portrait){
+                                heroImage = hero.url_full_portrait
+                            }
                         }
                     })
                     if(!heroId){
@@ -586,7 +598,7 @@ you can react on right to create your character or wrong to cancel`
                             { name: 'Deaths', value: stat.deaths, inline: true },
                             { name: 'Assists', value: stat.assists, inline: true }
                         )
-                        .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+                        .setThumbnail(heroImage)
                         .addFields(
                             {name:'Duration', value: duration, inline:true},
                             {name:'Party type',value: partysize,inline:true},
