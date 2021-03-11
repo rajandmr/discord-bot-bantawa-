@@ -527,7 +527,7 @@ you can react on right to create your character or wrong to cancel`
                     const matches = [];
                     const user = await ProfileModel.findOne({Tag:message.author.tag});
                     const id = user.SteamID;
-                    const {data} = await Axios.get(`https://api.opendota.com/api/players/${id}/recentMatches`);
+                    const {data} = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
                     data.forEach(match=>{
                         if(match.hero_id===heroId){
                             matches.push(match);
