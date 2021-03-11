@@ -503,8 +503,100 @@ you can react on right to create your character or wrong to cancel`
                         message.channel.send(dota2stats)
                     }
                     else {
-                        message.channel.send("recent 10 ota game ko matra stat vanxu ma")
+                        message.channel.send("recent 2000 ota game ko matra stat vanxu ma")
                     }
+                }
+                if(args[0]==='hero'){
+                    args.shift();
+                    if(!args.length) return message.channel.send('use ***bantaba hero <heroName> <matchNumber> ***')
+                    const size = args.length;
+                    const matchNumber = args[size-1];
+                  
+                    args.pop();
+                    const heroName = args.join(" ")
+                    let heroId;
+                    heroes.map(hero=>{
+                        if(hero.localized_name.toLowerCase()===heroName){
+                            heroId = hero.id;
+                        }
+                    })
+                    if(!heroId){
+                        return message.channel.send('hero ko name milena jasto xa feri try')
+                    }
+                   
+                    const matches = [];
+                    const user = await ProfileModel.findOne({Tag:message.author.tag});
+                    const id = user.SteamID;
+                    const {data} = await Axios.get(`https://api.opendota.com/api/players/${id}/recentMatches`);
+                    data.forEach(match=>{
+                        if(match.hero_id===heroId){
+                            matches.push(match);
+                        };
+                    })
+                    if(!matches.length){
+                        return message.channel.send('vetiyena yar game dherei purano raixa')
+                    }
+                    
+                    const stat = matches[matchNumber-1];
+                    if(!stat){
+                        return message.channel.send('vetiyena yar game dherei purano raixa')
+                    }
+                    const player_slot = stat.player_slot;
+                    const radiant_win = stat.radiant_win;
+                
+                    const duration = moment.utc(stat.duration*1000).format('H:mm:ss');
+                    let result = ''
+                    let Team = ''
+                    if(player_slot>=0&&player_slot<=127){
+                        Team = 'Radiant'
+                        if(radiant_win){
+                            result = 'Win'
+                        }else{
+                            result = 'Loss'
+                        }
+                    }else{
+                        Team= 'Dire'
+                        if(radiant_win){
+                            result ='Loss'
+                        }else{
+                            result='Win'
+                        }
+                    }
+                    const author = await Axios.get(`https://api.opendota.com/api/players/${id}`);
+                    let partysize ='';
+                    if(stat.party_size === 1){
+                        partysize='solo queue'
+                    }else{
+                        partysize = `${stat.party_size} man party`
+                    }
+                    const lobby= stat.lobby_type;
+                    const game = stat.game_mode;
+                    const personaname = author.data.profile.personaname;
+                    const avatar = author.data.profile.avatar;
+                    const dota2stats = new MessageEmbed()
+                        .setColor('#ad1005')
+                        .setTitle('Dota 2')
+                        .setAuthor(personaname, avatar)
+                        .setDescription(`Played as **${heroName}**`)
+
+                        .addFields(
+                            {name: lobby_type[lobby].name, value:`${game_mode[game].name}`},
+                            { name: 'Team', value: `**${Team}** (${result})` },
+                            { name: 'Kills', value: stat.kills, inline: true },
+                            { name: 'Deaths', value: stat.deaths, inline: true },
+                            { name: 'Assists', value: stat.assists, inline: true }
+                        )
+                        .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+                        .addFields(
+                            {name:'Duration', value: duration, inline:true},
+                            {name:'Party type',value: partysize,inline:true},
+                            {name:'Leaver', value:stat.leaver_status?'leaver detected':'no leavers',inline:true}
+                        )
+                        
+
+
+                    message.channel.send(dota2stats)
+
                 }
             }
             if (command === 'embed') {
@@ -560,6 +652,7 @@ you can react on right to create your character or wrong to cancel`
 
 
             }
+            
 
         }
     }
