@@ -304,7 +304,7 @@ you can react on right to create your character or wrong to cancel`
                         ctx.fillText(`DEF: ${profile[0].Defense}`, 550, 420);
                         ctx.fillText(`GOD: ${profile[0].God}`, 50, 630);
                         ctx.fillText(`Married: ${profile[0].IsMarried}`, 50, 700);
-                        if(profile[0].SteamID){
+                        if (profile[0].SteamID) {
                             ctx.fillText(`Steam ID: ${profile[0].SteamID}`, 360, 630);
                         }
 
@@ -422,7 +422,7 @@ you can react on right to create your character or wrong to cancel`
                 }
                 if (args[0] === 'match') {
                     const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                    if(!user.SteamID){
+                    if (!user.SteamID) {
                         return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
                     }
                     const id = user.SteamID;
@@ -438,50 +438,52 @@ you can react on right to create your character or wrong to cancel`
                         const author = await Axios.get(`https://api.opendota.com/api/players/${id}`);
 
                         const stat = data[matchNumber - 1];
-                        if(!stat){
+                        if (!stat) {
                             return message.channel.send('dherei purano game raixa vetindeina yesko dost')
                         }
+                        user.MatchID = stat.match_id;
+                        await user.save();
                         const heroId = stat.hero_id;
                         const player_slot = stat.player_slot;
                         const radiant_win = stat.radiant_win;
-                    
-                        const duration = moment.utc(stat.duration*1000).format('H:mm:ss');
+
+                        const duration = moment.utc(stat.duration * 1000).format('H:mm:ss');
                         let result = ''
                         let Team = ''
-                        if(player_slot>=0&&player_slot<=127){
+                        if (player_slot >= 0 && player_slot <= 127) {
                             Team = 'Radiant'
-                            if(radiant_win){
+                            if (radiant_win) {
                                 result = 'Win'
-                            }else{
+                            } else {
                                 result = 'Loss'
                             }
-                        }else{
-                            Team= 'Dire'
-                            if(radiant_win){
-                                result ='Loss'
-                            }else{
-                                result='Win'
+                        } else {
+                            Team = 'Dire'
+                            if (radiant_win) {
+                                result = 'Loss'
+                            } else {
+                                result = 'Win'
                             }
                         }
-                        
+
                         let heroName = '';
-                        let heroImage= 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
+                        let heroImage = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
                         heroes.map(hero => {
                             if (hero.id === heroId) {
                                 heroName = hero.localized_name
-                                if(hero.url_full_portrait){
-                                    heroImage=hero.url_full_portrait
+                                if (hero.url_full_portrait) {
+                                    heroImage = hero.url_full_portrait
                                 }
                             }
                         })
 
-                        let partysize ='';
-                        if(stat.party_size === 1){
-                            partysize='solo queue'
-                        }else{
+                        let partysize = '';
+                        if (stat.party_size === 1) {
+                            partysize = 'solo queue'
+                        } else {
                             partysize = `${stat.party_size} man party`
                         }
-                        const lobby= stat.lobby_type;
+                        const lobby = stat.lobby_type;
                         const game = stat.game_mode;
                         const personaname = author.data.profile.personaname;
                         const avatar = author.data.profile.avatar;
@@ -492,7 +494,7 @@ you can react on right to create your character or wrong to cancel`
                             .setDescription(`Played as **${heroName}**`)
 
                             .addFields(
-                                {name: lobby_type[lobby].name, value:`${game_mode[game].name}`},
+                                { name: lobby_type[lobby].name, value: `${game_mode[game].name}` },
                                 { name: 'Team', value: `**${Team}** (${result})` },
                                 { name: 'Kills', value: stat.kills, inline: true },
                                 { name: 'Deaths', value: stat.deaths, inline: true },
@@ -500,11 +502,11 @@ you can react on right to create your character or wrong to cancel`
                             )
                             .setThumbnail(heroImage)
                             .addFields(
-                                {name:'Duration', value: duration, inline:true},
-                                {name:'Party type',value: partysize,inline:true},
-                                {name:'Leaver', value:stat.leaver_status?'leaver detected':'no leavers',inline:true}
+                                { name: 'Duration', value: duration, inline: true },
+                                { name: 'Party type', value: partysize, inline: true },
+                                { name: 'Leaver', value: stat.leaver_status ? 'leaver detected' : 'no leavers', inline: true }
                             )
-                            
+
 
 
                         message.channel.send(dota2stats)
@@ -513,86 +515,89 @@ you can react on right to create your character or wrong to cancel`
                         message.channel.send("recent 10000 ota game ko matra stat vanxu ma")
                     }
                 }
-                if(args[0]==='hero'){
+                if (args[0] === 'hero') {
                     args.shift();
-                    if(!args.length) return message.channel.send('use ***bantaba hero <heroName> <matchNumber> ***')
+                    if (!args.length) return message.channel.send('use ***bantaba hero <heroName> <matchNumber> ***')
                     const size = args.length;
-                    const matchNumber = args[size-1];
-                  
+                    const matchNumber = args[size - 1];
+
                     args.pop();
                     let heroName = args.join(" ")
                     let heroId;
-                    let heroImage= 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
-                    heroes.map(hero=>{
-                        if(hero.localized_name.toLowerCase()===heroName){
+                    let heroImage = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
+                    heroes.map(hero => {
+                        if (hero.localized_name.toLowerCase() === heroName) {
                             heroId = hero.id;
                             heroName = hero.localized_name
-                            if(hero.url_full_portrait){
-                                heroImage = hero.url_full_portrait
+                            if (hero.url_vertical_portrait) {
+                                heroImage = hero.url_vertical_portrait
                             }
                         }
                     })
-                    if(!heroId){
+                    if (!heroId) {
                         return message.channel.send('hero ko name milena jasto xa feri try')
                     }
-                   
+
                     const matches = [];
-                    const user = await ProfileModel.findOne({Tag:message.author.tag});
+                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
                     const id = user.SteamID;
-                    const {data} = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
-                    data.forEach(match=>{
-                        if(match.hero_id===heroId){
+                    const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
+                    data.forEach(match => {
+                        if (match.hero_id === heroId) {
                             matches.push(match);
                         };
                     })
-                    if(!matches.length){
+                    if (!matches.length) {
                         return message.channel.send('vetiyena yar game dherei purano raixa')
                     }
-                    
-                    const stat = matches[matchNumber-1];
-                    if(!stat){
-                        return message.channel.send('vetiyena yar game dherei purano raixa')
+
+                    const stat = matches[matchNumber - 1];
+                    if (!stat) {
+                        return message.channel.send('purano raixa match vetiyena')
                     }
+                   
+                    user.MatchID = stat.match_id;
+                    await user.save();
                     const player_slot = stat.player_slot;
                     const radiant_win = stat.radiant_win;
-                
-                    const duration = moment.utc(stat.duration*1000).format('H:mm:ss');
+
+                    const duration = moment.utc(stat.duration * 1000).format('H:mm:ss');
                     let result = ''
                     let Team = ''
-                    if(player_slot>=0&&player_slot<=127){
+                    if (player_slot >= 0 && player_slot <= 127) {
                         Team = 'Radiant'
-                        if(radiant_win){
+                        if (radiant_win) {
                             result = 'Win'
-                        }else{
+                        } else {
                             result = 'Loss'
                         }
-                    }else{
-                        Team= 'Dire'
-                        if(radiant_win){
-                            result ='Loss'
-                        }else{
-                            result='Win'
+                    } else {
+                        Team = 'Dire'
+                        if (radiant_win) {
+                            result = 'Loss'
+                        } else {
+                            result = 'Win'
                         }
                     }
                     const author = await Axios.get(`https://api.opendota.com/api/players/${id}`);
-                    let partysize ='';
-                    if(stat.party_size === 1){
-                        partysize='solo queue'
-                    }else{
+                    let partysize = '';
+                    if (stat.party_size === 1) {
+                        partysize = 'solo queue'
+                    } else {
                         partysize = `${stat.party_size} man party`
                     }
-                    const lobby= stat.lobby_type;
+                    const lobby = stat.lobby_type;
                     const game = stat.game_mode;
                     const personaname = author.data.profile.personaname;
                     const avatar = author.data.profile.avatar;
                     const dota2stats = new MessageEmbed()
-                        .setColor('#ad1005')
+                        .setColor('#f5e56c')
                         .setTitle('Dota 2')
                         .setAuthor(personaname, avatar)
                         .setDescription(`Played as **${heroName}**`)
 
                         .addFields(
-                            {name: lobby_type[lobby].name, value:`${game_mode[game].name}`},
+                            { name: lobby_type[lobby].name, value: `${game_mode[game].name}` },
                             { name: 'Team', value: `**${Team}** (${result})` },
                             { name: 'Kills', value: stat.kills, inline: true },
                             { name: 'Deaths', value: stat.deaths, inline: true },
@@ -600,16 +605,35 @@ you can react on right to create your character or wrong to cancel`
                         )
                         .setThumbnail(heroImage)
                         .addFields(
-                            {name:'Duration', value: duration, inline:true},
-                            {name:'Party type',value: partysize,inline:true},
-                            {name:'Leaver', value:stat.leaver_status?'leaver detected':'no leavers',inline:true}
+                            { name: 'Duration', value: duration, inline: true },
+                            { name: 'Party type', value: partysize, inline: true },
+                            { name: 'Leaver', value: stat.leaver_status ? 'leaver detected' : 'no leavers', inline: true }
                         )
-                        
+
 
 
                     message.channel.send(dota2stats)
 
                 }
+                if (args[0] === 'wl') {
+                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                    const id = user.SteamID;
+                    const wl = await Axios.get(`https://api.opendota.com/api/players/${id}/wl`);
+                    const profile = await Axios.get(`https://api.opendota.com/api/players/${id}`);
+                    const wlstat = new MessageEmbed()
+                        .setColor('#0099ff')
+                        .setTitle('Dota 2')
+                        .setAuthor(`${profile.data.profile.personaname}`, `${profile.data.profile.avatar}`)
+                        .addFields(
+                            { name: 'Win', value: `${wl.data.win}`,inline: true },
+                            { name: 'Lose', value: `${wl.data.lose}`,inline: true },
+
+                        )
+                        .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+                            
+                    message.channel.send(wlstat);
+                }
+
             }
             if (command === 'embed') {
                 const exampleEmbed = new MessageEmbed()
@@ -642,15 +666,16 @@ you can react on right to create your character or wrong to cancel`
 
             if (command === 'mmr') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                if(!user.SteamID){
+                if (!user.SteamID) {
                     return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
                 }
                 const id = user.SteamID;
+                
                 const data = await Axios.get(`https://api.opendota.com/api/players/${id}`);
 
                 if (typeof data.data.profile !== 'object') return message.channel.send('vetena tmro profile sathi data publicly expose gara dota kholera')
                 const dota2Profile = new MessageEmbed()
-                    .setColor('#0099ff')
+                    .setColor('#dd51ed')
                     .setTitle('Dota 2')
                     .setAuthor(`${data.data.profile.personaname}`, `${data.data.profile.avatar}`)
                     .addFields(
@@ -664,7 +689,7 @@ you can react on right to create your character or wrong to cancel`
 
 
             }
-            
+
 
         }
     }

@@ -54,7 +54,8 @@ const ProfileSchema = new Mongoose.Schema({
         type: String,
         default: 'X-URL'
     },
-    SteamID: String
+    SteamID: String,
+    MatchID: String
 },
 {
     timestamps: true
