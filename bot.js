@@ -7,7 +7,8 @@ const ProfileModel = require('./model/profile')
 const game_mode = require('./game_mode');
 const lobby_type = require('./lobby_type');
 const heroes = require('./heroes');
-const dota_items = require('./dota_items');
+const dota_items = require('./dota_items_old');
+const fs =require('fs');
 
 const { Client, MessageAttachment, MessageEmbed } = require('discord.js');
 
@@ -785,9 +786,9 @@ you can react on right to create your character or wrong to cancel`
                     }
                 })
 
-                const canvas = Canvas.createCanvas(225, 100);
+                const canvas = Canvas.createCanvas(225, 150);
                 const ctx = canvas.getContext('2d');
-                const background = await Canvas.loadImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoCna4pql7pnrc_9SK4-oLmDg4ws-CyXNjIg&usqp=CAU');
+                const background = await Canvas.loadImage('https://media.tarkett-image.com/large/TH_25094225_25187225_001.jpg');
                 ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
                 const Item1Url = getItemImage(playerInfo.item_0);
@@ -809,24 +810,18 @@ you can react on right to create your character or wrong to cancel`
                 const Item6 = await Canvas.loadImage(Item6Url);
                 ctx.drawImage(Item6, 150, 50, 75, 50);
 
+                const backpackItem1Url = getItemImage(playerInfo.backpack_0);
+                const backpackItem1 = await Canvas.loadImage(backpackItem1Url);
+                ctx.drawImage(backpackItem1,0,110,75,40);
+                const backpackItem2Url = getItemImage(playerInfo.backpack_1);
+                const backpackItem2 = await Canvas.loadImage(backpackItem2Url);
+                ctx.drawImage(backpackItem2,75,110,75,40);
+                const backpackItem3Url = getItemImage(playerInfo.backpack_2);
+                const backpackItem3 = await Canvas.loadImage(backpackItem3Url);
+                ctx.drawImage(backpackItem3,150,110,75,40);
+
 
                 const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
-
-
-
-                const items = new MessageEmbed()
-                    .setTitle('Dota 2 Items')
-                    .addFields(
-                        { name: 'Item 1', value: getItemName(playerInfo.item_0), inline: true },
-                        { name: 'Item 2', value: getItemName(playerInfo.item_1), inline: true },
-                        { name: 'Item 3', value: getItemName(playerInfo.item_2), inline: true },
-                    )
-                    .addFields(
-                        { name: 'Item 4', value: getItemName(playerInfo.item_3), inline: true },
-                        { name: 'Item 5', value: getItemName(playerInfo.item_4), inline: true },
-                        { name: 'Item 6', value: getItemName(playerInfo.item_5), inline: true },
-                    )
-                    .setImage(getItemImage(playerInfo.item_0))
 
                 message.channel.send(attachment);
             }
@@ -843,12 +838,12 @@ you can react on right to create your character or wrong to cancel`
 
                 message.channel.send(`\`\`\`You currently have $${gold}\`\`\``)
             }
-
+            
 
         }
 
     }
-    catch (e) {
+    catch (e){
         console.log(e);
     }
 
@@ -896,21 +891,50 @@ const applyText = (canvas, text) => {
 
 
 
-const getItemName = (itemId) => {
-    let itemName;
-    dota_items.map(item => {
-        if (item.id === itemId) {
-            itemName = item.localized_name
-        }
+// const getItemName = (itemId) => {
+//     let itemName;
+//     dota_items.map(item => {
+//         if (item.id === itemId) {
+//             itemName = item.localized_name
+//         }
+//     })
+//     return itemName;
+// }
+
+// const getItemImage = (itemId) => {
+//     let itemImage = 'https://upload.wikimedia.org/wikipedia/commons/6/6a/A_blank_flag.png';
+//     dota_items.map(item => {
+//         if (item.id === itemId) {
+//             itemImage = item.url_image;
+//         }
+//     })
+//     return itemImage;
+// }
+
+const getAllItemImages = ()=>{
+    let images = [];
+    const items = require('./dota_items_new');
+    items.forEach(item=>{
+        const obj={};
+        
+        let newItem=item.name.split('_');
+        newItem.shift();
+        newItem = newItem.join("_");
+        
+        obj.url = `http://cdn.dota2.com/apps/dota2/images/items/${newItem}_lg.png`;
+        obj.id = item.id;
+        images.push(obj);
+        
     })
-    return itemName;
+    return images;
 }
 
-const getItemImage = (itemId) => {
+const getItemImage = (itemId) =>{
     let itemImage = 'https://upload.wikimedia.org/wikipedia/commons/6/6a/A_blank_flag.png';
-    dota_items.map(item => {
-        if (item.id === itemId) {
-            itemImage = item.url_image;
+    const dota_items = getAllItemImages();
+    dota_items.map(item=>{
+        if(item.id===itemId){
+            itemImage = item.url;
         }
     })
     return itemImage;
