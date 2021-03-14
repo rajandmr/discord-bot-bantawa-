@@ -7,8 +7,9 @@ const ProfileModel = require('./model/profile')
 const game_mode = require('./game_mode');
 const lobby_type = require('./lobby_type');
 const heroes = require('./heroes');
+const dota_items = require('./dota_items');
 
-const { Client, MessageAttachment, MessageEmbed, MessageFlags } = require('discord.js');
+const { Client, MessageAttachment, MessageEmbed } = require('discord.js');
 
 const Canvas = require('canvas');
 
@@ -556,7 +557,7 @@ you can react on right to create your character or wrong to cancel`
                     if (!stat) {
                         return message.channel.send('purano raixa match vetiyena')
                     }
-                   
+
                     user.MatchID = stat.match_id;
                     user.HeroID = stat.hero_id;
                     await user.save();
@@ -627,12 +628,12 @@ you can react on right to create your character or wrong to cancel`
                         .setTitle('Dota 2')
                         .setAuthor(`${profile.data.profile.personaname}`, `${profile.data.profile.avatar}`)
                         .addFields(
-                            { name: 'Win', value: `${wl.data.win}`,inline: true },
-                            { name: 'Lose', value: `${wl.data.lose}`,inline: true },
+                            { name: 'Win', value: `${wl.data.win}`, inline: true },
+                            { name: 'Lose', value: `${wl.data.lose}`, inline: true },
 
                         )
                         .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
-                            
+
                     message.channel.send(wlstat);
                 }
 
@@ -672,7 +673,7 @@ you can react on right to create your character or wrong to cancel`
                     return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
                 }
                 const id = user.SteamID;
-                
+
                 const data = await Axios.get(`https://api.opendota.com/api/players/${id}`);
 
                 if (typeof data.data.profile !== 'object') return message.channel.send('vetena tmro profile sathi data publicly expose gara dota kholera')
@@ -692,41 +693,70 @@ you can react on right to create your character or wrong to cancel`
 
             }
 
-            if(command==='items'){
-                const user = await ProfileModel.findOne({Tag:message.author.tag});
-                if(!user){
+            if (command === 'items') {
+                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                if (!user) {
                     return message.channel.send('suru ma match search gara ani balla tesko details dekhauxu ma')
                 }
                 const MatchID = user.MatchID;
                 const HeroID = user.HeroID;
-                
+
                 const match = await Axios.get(`https://api.opendota.com/api/matches/${MatchID}`);
                 let playerInfo = {};
-                match.data.players.map(player=>{
-                    if(player.hero_id === 56){
+                match.data.players.map(player => {
+                    if (player.hero_id === HeroID) {
                         playerInfo = player;
                     }
                 })
-                console.log(playerInfo);
-                console.log(HeroID);
+
+                const canvas = Canvas.createCanvas(225, 100);
+                const ctx = canvas.getContext('2d');
+                const background = await Canvas.loadImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSoCna4pql7pnrc_9SK4-oLmDg4ws-CyXNjIg&usqp=CAU');
+                ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+                const Item1Url = getItemImage(playerInfo.item_0);
+                const Item1 = await Canvas.loadImage(Item1Url);
+                ctx.drawImage(Item1, 0, 0, 75, 50);
+                const Item2Url = getItemImage(playerInfo.item_1);
+                const Item2 = await Canvas.loadImage(Item2Url);
+                ctx.drawImage(Item2, 75, 0, 75, 50);
+                const Item3Url = getItemImage(playerInfo.item_2);
+                const Item3 = await Canvas.loadImage(Item3Url);
+                ctx.drawImage(Item3, 150, 0, 75, 50);
+                const Item4Url = getItemImage(playerInfo.item_3);
+                const Item4 = await Canvas.loadImage(Item4Url);
+                ctx.drawImage(Item4, 0, 50, 75, 50);
+                const Item5Url = getItemImage(playerInfo.item_4);
+                const Item5 = await Canvas.loadImage(Item5Url);
+                ctx.drawImage(Item5, 75, 50, 75, 50);
+                const Item6Url = getItemImage(playerInfo.item_5);
+                const Item6 = await Canvas.loadImage(Item6Url);
+                ctx.drawImage(Item6, 150, 50, 75, 50);
+                
+
+                const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
+
+                
 
                 const items = new MessageEmbed()
                     .setTitle('Dota 2 Items')
                     .addFields(
-                        {name: 'Item 1',value: playerInfo.item_0,inline:true },
-                        {name: 'Item 2',value: playerInfo.item_1,inline:true },
-                        {name: 'Item 3',value: playerInfo.item_2,inline:true },
+                        { name: 'Item 1', value: getItemName(playerInfo.item_0), inline: true },
+                        { name: 'Item 2', value: getItemName(playerInfo.item_1), inline: true },
+                        { name: 'Item 3', value: getItemName(playerInfo.item_2), inline: true },
                     )
                     .addFields(
-                        {name: 'Item 4',value: playerInfo.item_3,inline:true },
-                        {name: 'Item 5',value: playerInfo.item_4,inline:true },
-                        {name: 'Item 6',value: playerInfo.item_5,inline:true },
+                        { name: 'Item 4', value: getItemName(playerInfo.item_3), inline: true },
+                        { name: 'Item 5', value: getItemName(playerInfo.item_4), inline: true },
+                        { name: 'Item 6', value: getItemName(playerInfo.item_5), inline: true },
                     )
-                message.channel.send(items);
-            }
-            
+                    .setImage(getItemImage(playerInfo.item_0))
 
-            
+                message.channel.send(attachment);
+            }
+
+
+
         }
     }
     catch (e) {
@@ -776,6 +806,26 @@ const applyText = (canvas, text) => {
 };
 
 
+
+const getItemName = (itemId) => {
+    let itemName;
+    dota_items.map(item => {
+        if (item.id === itemId) {
+            itemName = item.localized_name
+        }
+    })
+    return itemName;
+}
+
+const getItemImage = (itemId) => {
+    let itemImage='https://upload.wikimedia.org/wikipedia/commons/6/6a/A_blank_flag.png';
+    dota_items.map(item => {
+        if (item.id === itemId) {
+            itemImage = item.url_image;
+        }
+    })
+    return itemImage;
+}
 
 
 client.login(process.env.DISCORD_BOT_TOKEN)
