@@ -442,6 +442,7 @@ you can react on right to create your character or wrong to cancel`
                             return message.channel.send('dherei purano game raixa vetindeina yesko dost')
                         }
                         user.MatchID = stat.match_id;
+                        user.HeroID = stat.hero_id;
                         await user.save();
                         const heroId = stat.hero_id;
                         const player_slot = stat.player_slot;
@@ -557,6 +558,7 @@ you can react on right to create your character or wrong to cancel`
                     }
                    
                     user.MatchID = stat.match_id;
+                    user.HeroID = stat.hero_id;
                     await user.save();
                     const player_slot = stat.player_slot;
                     const radiant_win = stat.radiant_win;
@@ -690,7 +692,41 @@ you can react on right to create your character or wrong to cancel`
 
             }
 
+            if(command==='items'){
+                const user = await ProfileModel.findOne({Tag:message.author.tag});
+                if(!user){
+                    return message.channel.send('suru ma match search gara ani balla tesko details dekhauxu ma')
+                }
+                const MatchID = user.MatchID;
+                const HeroID = user.HeroID;
+                
+                const match = await Axios.get(`https://api.opendota.com/api/matches/${MatchID}`);
+                let playerInfo = {};
+                match.data.players.map(player=>{
+                    if(player.hero_id === 56){
+                        playerInfo = player;
+                    }
+                })
+                console.log(playerInfo);
+                console.log(HeroID);
 
+                const items = new MessageEmbed()
+                    .setTitle('Dota 2 Items')
+                    .addFields(
+                        {name: 'Item 1',value: playerInfo.item_0,inline:true },
+                        {name: 'Item 2',value: playerInfo.item_1,inline:true },
+                        {name: 'Item 3',value: playerInfo.item_2,inline:true },
+                    )
+                    .addFields(
+                        {name: 'Item 4',value: playerInfo.item_3,inline:true },
+                        {name: 'Item 5',value: playerInfo.item_4,inline:true },
+                        {name: 'Item 6',value: playerInfo.item_5,inline:true },
+                    )
+                message.channel.send(items);
+            }
+            
+
+            
         }
     }
     catch (e) {
