@@ -172,14 +172,90 @@ client.on('message', async (message) => {
             }
 
             if (command === 'flip') {
-                var a = Math.floor(Math.random() * 2);
-                if (a === 0) {
-                    message.channel.send(`>>> ***Heads*** aayo kta ho :exploding_head: `)
-                }
-                if (a === 1) {
+                const amount = Number(args.join(" "));
+                if (args[0] === 'heads') {
+                    args.shift();
+                    const amount = Number(args.join(" "));
+                    console.log(amount);
+                    if (amount >= 0 && amount <= 1000000) {
 
-                    message.channel.send(`>>> la thik xa ***Tails*** raixa :cocktail: `)
+                        const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                        if(!user){
+                            message.channel.send('character banau suruma, user ***bantaba create <character>***')
+                        }
+                        if (amount <= user.Gold) {
+                            var a = Math.floor(Math.random() * 2);
+                            if (a === 0) {
+                                user.Gold = user.Gold + amount;
+                                await user.save();
+                                return message.channel.send(`:exploding_head: It's **Heads**. You won **$${amount}**`)
+                            }
+                            if (a === 1) {
+                                user.Gold = user.Gold - amount;
+                                await user.save();
+                                return message.channel.send(` :cocktail: It's **Tails** You Lost **$${amount}** `)
+                            }
+                        } else {
+                            return message.channel.send('Garib raixau sathi tme ta')
+                        }
+                    }   
+
                 }
+                else if(args[0]==='tails'){
+                    args.shift();
+                    const amount = Number(args.join(" "));
+                    console.log(amount);
+                    if (amount >= 0 && amount <= 1000000) {
+
+                        const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                        if(!user){
+                            message.channel.send('character banau suruma, user ***bantaba create <character>***')
+                        }
+                        if (amount <= user.Gold) {
+                            var a = Math.floor(Math.random() * 2);
+                            if (a === 0) {
+                                user.Gold = user.Gold - amount;
+                                await user.save();
+                                return message.channel.send(`:exploding_head: It's **Heads**. You Lost **$${amount}**`)
+                            }
+                            if (a === 1) {
+                                user.Gold = user.Gold + amount;
+                                await user.save();
+                                return message.channel.send(` :cocktail: It's **Tails** You Won **$${amount}** `)
+                            }
+                        } else {
+                            return message.channel.send('Garib raixau sathi tme ta')
+                        }
+                    }   
+                }
+                 else if (amount >= 0 && amount <= 1000000) {
+
+                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                    if(!user){
+                        message.channel.send('character banau suruma, user ***bantaba create <character>***')
+                    }
+                    if (amount <= user.Gold) {
+                        var a = Math.floor(Math.random() * 2);
+                        if (a === 0) {
+                            user.Gold = user.Gold + amount;
+                            await user.save();
+                            return message.channel.send(`:exploding_head: It's **Heads**. You won **$${amount}**`)
+                        }
+                        if (a === 1) {
+                            user.Gold = user.Gold - amount;
+                            await user.save();
+                            return message.channel.send(` :cocktail: It's **Tails** You Lost **$${amount}** `)
+                        }
+                    } else {
+                        return message.channel.send('Garib raixau sathi tme ta')
+                    }
+
+
+                }
+                else {
+                    return message.channel.send('0 - 1million matra gamble gara sathi tyo vanda dherei pani hiana thorei pani haina')
+                }
+
             }
 
             if (command === 'check') {
@@ -732,11 +808,11 @@ you can react on right to create your character or wrong to cancel`
                 const Item6Url = getItemImage(playerInfo.item_5);
                 const Item6 = await Canvas.loadImage(Item6Url);
                 ctx.drawImage(Item6, 150, 50, 75, 50);
-                
+
 
                 const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
 
-                
+
 
                 const items = new MessageEmbed()
                     .setTitle('Dota 2 Items')
@@ -755,9 +831,22 @@ you can react on right to create your character or wrong to cancel`
                 message.channel.send(attachment);
             }
 
+            if (command === 'money') {
+                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const gold = user.Gold;
+
+                message.channel.send(`You currently have **$${gold}**, <@${message.author.id}>`)
+            }
+            if (command === 'economy') {
+                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const gold = user.Gold;
+
+                message.channel.send(`\`\`\`You currently have $${gold}\`\`\``)
+            }
 
 
         }
+
     }
     catch (e) {
         console.log(e);
@@ -818,7 +907,7 @@ const getItemName = (itemId) => {
 }
 
 const getItemImage = (itemId) => {
-    let itemImage='https://upload.wikimedia.org/wikipedia/commons/6/6a/A_blank_flag.png';
+    let itemImage = 'https://upload.wikimedia.org/wikipedia/commons/6/6a/A_blank_flag.png';
     dota_items.map(item => {
         if (item.id === itemId) {
             itemImage = item.url_image;
