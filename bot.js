@@ -838,6 +838,21 @@ you can react on right to create your character or wrong to cancel`
 
                 message.channel.send(`\`\`\`You currently have $${gold}\`\`\``)
             }
+            if( command === 'richest'){
+                const users = await ProfileModel.find({}).sort({Gold: -1});
+                let msg=''
+                users.forEach((user,index)=>{
+                    msg=msg+`${index+1}. \`${user.Name}\`, a character by \`${user.Tag}\` with **$${user.Gold}**
+                    `;
+                })
+                const richestPlayers = new MessageEmbed()
+                    .setColor("#0af568")
+                    .setTitle("The Richest Players of bantabaRPG")
+                    .setDescription(`${msg}`)
+
+                message.channel.send(richestPlayers)
+            }
+            
             
 
         }
