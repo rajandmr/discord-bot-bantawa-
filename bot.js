@@ -8,7 +8,7 @@ const game_mode = require('./game_mode');
 const lobby_type = require('./lobby_type');
 const heroes = require('./heroes');
 const dota_items = require('./dota_items_old');
-const fs = require('fs');
+
 
 const { Client, MessageAttachment, MessageEmbed } = require('discord.js');
 
@@ -36,6 +36,8 @@ const prefix = 'bantaba'
 const prefix2 = 'Bantaba'
 const prefix3 = 'bantawa'
 const prefix4 = 'Bantawa'
+const prefix5 ='#'
+const prefix6 = '~'
 
 
 
@@ -122,9 +124,15 @@ client.on('message', async (message) => {
 
 
     try {
-        if (message.content.startsWith(prefix) || message.content.startsWith(prefix2) || message.content.startsWith(prefix3) || message.content.startsWith(prefix4)) {
-            const args = message.content.slice(prefix.length).trim().split(/ +/g);
+        if (message.content.startsWith(prefix) || message.content.startsWith(prefix2) || message.content.startsWith(prefix3) || message.content.startsWith(prefix4) || message.content.startsWith(prefix5) || message.content.startsWith(prefix6)) {
+            let args='';
+            if(message.content.startsWith(prefix5)||message.content.startsWith(prefix6)){
+                 args = message.content.slice(1).trim().split(/ +/g);
+           }else{
+             args = message.content.slice(prefix.length).trim().split(/ +/g);
+           }
             const command = args.shift();
+
             if (command === 'play') {
                 const voiceChannel = message.member.voice.channel;
                 if (!voiceChannel) {
@@ -141,7 +149,6 @@ client.on('message', async (message) => {
                     const videoResult = await ytSearch(query);
                     return (videoResult.videos.length > 1) ? videoResult.videos[0] : null;
                 }
-                console.log(args.join(" "))
                 const video = await videoFinder(args.join(" "))
 
                 if (video) {
@@ -151,6 +158,7 @@ client.on('message', async (message) => {
                             voiceChannel.leave();
                         })
                     await message.channel.send(`:musical_note::musical_note: Now playing ***${video.title} ${video.url}***`)
+                    return;
                 } else {
                     return message.channel.send("youtube ma video vetena")
                 }
@@ -177,7 +185,6 @@ client.on('message', async (message) => {
                 if (args[0] === 'heads') {
                     args.shift();
                     const amount = Number(args.join(" "));
-                    console.log(amount);
                     if (amount >= 0 && amount <= 1000000) {
 
                         const user = await ProfileModel.findOne({ Tag: message.author.tag });
@@ -205,7 +212,6 @@ client.on('message', async (message) => {
                 else if (args[0] === 'tails') {
                     args.shift();
                     const amount = Number(args.join(" "));
-                    console.log(amount);
                     if (amount >= 0 && amount <= 1000000) {
 
                         const user = await ProfileModel.findOne({ Tag: message.author.tag });
@@ -272,7 +278,6 @@ client.on('message', async (message) => {
                         return message.channel.send('database problem aayo feri try gara hai sathi')
                     }
                     else if (profile.length !== 0) {
-                        console.log(profile)
                         return message.channel.send(`tmro character already raixa ta sathi **${profile[0].Name}** vanne. name edit garne vaye use ***bantaba edit <newName>*** `)
                     }
                     else {
@@ -726,6 +731,9 @@ you can react on right to create your character or wrong to cancel`
             }
             if (command === 'steam') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                if(user.SteamID){
+                    return message.channel.send('yo ek choti matra hannne command ho tmro steam id already xa change garne vaye contact Deepak Shrestha')
+                }
                 const steamId = args.join(" ");
                 user.SteamID = steamId;
                 await user.save();
@@ -931,9 +939,8 @@ you can react on right to create your character or wrong to cancel`
             }
 
             else {
-                const msg = message.content.split(' ');
-                msg.shift();
-                message.channel.send(`bantaba bot ko dictionary ma **${msg.join(" ")}** vanne sabda raina raixa`)
+                const msg = args.join(" ");
+                message.channel.send(`bantaba bot ko dictionary ma **${command} ${msg}** vanne sabda raina raixa`)
             }
         }
 
@@ -1008,6 +1015,9 @@ const applyText = (canvas, text) => {
 
 const getXP = (duration,kill,assists,deaths,level)=>{    
     let xp = 0;
+    if(deaths===0||deaths===1){
+        deaths=2;
+    }
     xp = (duration/7)*level+ ((kill+assists)/deaths)*100;
     return Math.trunc(xp);
 }
