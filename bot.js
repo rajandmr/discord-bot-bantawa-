@@ -36,7 +36,7 @@ const prefix = 'bantaba'
 const prefix2 = 'Bantaba'
 const prefix3 = 'bantawa'
 const prefix4 = 'Bantawa'
-const prefix5 ='#'
+const prefix5 = '#'
 const prefix6 = '~'
 
 
@@ -125,12 +125,12 @@ client.on('message', async (message) => {
 
     try {
         if (message.content.startsWith(prefix) || message.content.startsWith(prefix2) || message.content.startsWith(prefix3) || message.content.startsWith(prefix4) || message.content.startsWith(prefix5) || message.content.startsWith(prefix6)) {
-            let args='';
-            if(message.content.startsWith(prefix5)||message.content.startsWith(prefix6)){
-                 args = message.content.slice(1).trim().split(/ +/g);
-           }else{
-             args = message.content.slice(prefix.length).trim().split(/ +/g);
-           }
+            let args = '';
+            if (message.content.startsWith(prefix5) || message.content.startsWith(prefix6)) {
+                args = message.content.slice(1).trim().split(/ +/g);
+            } else {
+                args = message.content.slice(prefix.length).trim().split(/ +/g);
+            }
             const command = args.shift();
 
             if (command === 'play') {
@@ -355,7 +355,7 @@ you can react on right to create your character or wrong to cancel`
 
 
             if (command === 'profile') {
-                const profile = await ProfileModel.find({Tag:message.author.tag});
+                const profile = await ProfileModel.find({ Tag: message.author.tag });
                 if (!profile[0]) {
                     return message.channel.send('character banau suruma use ***bantaba create <name>***')
                 }
@@ -731,7 +731,7 @@ you can react on right to create your character or wrong to cancel`
             }
             if (command === 'steam') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                if(user.SteamID){
+                if (user.SteamID) {
                     return message.channel.send('yo ek choti matra hannne command ho tmro steam id already xa change garne vaye contact Deepak Shrestha')
                 }
                 const steamId = args.join(" ");
@@ -848,7 +848,7 @@ you can react on right to create your character or wrong to cancel`
 
                 return message.channel.send(richestPlayers)
             }
-            if (command === 'xp') {
+            if (command === 'addxp') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
                 const id = user.SteamID;
                 const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
@@ -857,7 +857,7 @@ you can react on right to create your character or wrong to cancel`
                     if (user.recentMatchID === data[0].match_id) {
                         return message.channel.send('xp already added xa feri new game khela sathi ani add gara');
                     }
-                    earnedXP = getXP(data[0].duration,data[0].kills,data[0].assists,data[0].deaths,user.Level);
+                    earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, data[0].deaths, user.Level,data[0]);
                     user.XP = user.XP + earnedXP;
                     user.Gold = user.Gold + Math.round(earnedXP / 2);
                     await user.save();
@@ -871,7 +871,7 @@ you can react on right to create your character or wrong to cancel`
                         user.Defense = user.Defense + 1;
                         levelup = true;
                     }
-                    user.recentMatchID=data[0].match_id;
+                    user.recentMatchID = data[0].match_id;
                     await user.save();
                     const XPdetails = new MessageEmbed().setTitle('XP details')
                         .setDescription(`Earned XP: ${earnedXP}
@@ -885,8 +885,8 @@ you can react on right to create your character or wrong to cancel`
 
 
                 } else {
-                   
-                    earnedXP = getXP(data[0].duration,data[0].kills,data[0].assists,data[0].deaths,user.Level);
+
+                    earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, data[0].deaths, user.Level,data[0]);
                     user.XP = user.XP + earnedXP;
                     user.Gold = user.Gold + Math.round(earnedXP / 2);
                     await user.save();
@@ -900,7 +900,7 @@ you can react on right to create your character or wrong to cancel`
                         user.Defense = user.Defense + 1;
                         levelup = true;
                     }
-                    user.recentMatchID=data[0].match_id;
+                    user.recentMatchID = data[0].match_id;
                     await user.save();
                     const XPdetails = new MessageEmbed().setTitle('XP details')
                         .setDescription(`Earned XP: ${earnedXP}
@@ -916,7 +916,7 @@ you can react on right to create your character or wrong to cancel`
 
             }
 
-            if(command === 'leaderboard'){
+            if (command === 'leaderboard') {
                 const users = await ProfileModel.find({}).sort({ XP: -1 });
                 let msg = ''
                 users.forEach((user, index) => {
@@ -931,10 +931,16 @@ you can react on right to create your character or wrong to cancel`
                 return message.channel.send(richestPlayers)
             }
 
-            if(command==='formula'){
+            if (command === 'formula') {
                 const formula = new MessageEmbed()
                     .setTitle('XP Formula')
-                    .setDescription(`xp = (Game duration / 7) x CurrentLevel+ ((kills + Assists) / deaths) x 100`)
+                    .setDescription(`\`xp = (Game duration/7) x CurrentLevel+ ((kills+Assists)/deaths) x 100\`
+
+                    Case **Win**:
+                         \`xp = xp + 25% of xp\`
+
+                    Case **Loss**:
+                         \`xp = xp - 40% of xp\` `)
                 return message.channel.send(formula)
             }
 
@@ -1013,12 +1019,33 @@ const applyText = (canvas, text) => {
 //     return itemImage;
 // }
 
-const getXP = (duration,kill,assists,deaths,level)=>{    
+const getXP = (duration, kill, assists, deaths, level, stat) => {
     let xp = 0;
-    if(deaths===0||deaths===1){
-        deaths=2;
+    if (deaths === 0 || deaths === 1) {
+        deaths = 2;
     }
-    xp = (duration/7)*level+ ((kill+assists)/deaths)*100;
+    const player_slot = stat.player_slot;
+    const radiant_win = stat.radiant_win;
+    let result = '';
+    if (player_slot >= 0 && player_slot <= 127) {
+        if (radiant_win) {
+            result = 'Win'
+        } else {
+            result = 'Loss'
+        }
+    } else {
+        if (radiant_win) {
+            result = 'Loss'
+        } else {
+            result = 'Win'
+        }
+    }
+    xp = (duration / 7) * level + ((kill + assists) / deaths) * 100;
+    if(result === 'Win'){
+        xp = xp + 0.25*xp;
+    }else {
+        xp = xp - 0.4*xp;
+    }
     return Math.trunc(xp);
 }
 
