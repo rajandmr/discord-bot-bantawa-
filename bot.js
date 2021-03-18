@@ -271,689 +271,722 @@ client.on('message', async (message) => {
 
             if (command === 'create') {
                 if (!args.length) return message.channel.send('character ko name ni chaiyo');
-                ProfileModel.find({
-                    Tag: message.author.tag
-                }, (err, profile) => {
-                    if (err) {
-                        return message.channel.send('database problem aayo feri try gara hai sathi')
-                    }
-                    else if (profile.length !== 0) {
-                        return message.channel.send(`tmro character already raixa ta sathi **${profile[0].Name}** vanne. name edit garne vaye use ***bantaba edit <newName>*** `)
-                    }
-                    else {
-                        const Username = message.author.username;
-                        const Tag = message.author.tag;
-                        const UserId = message.author.id;
-                        const Name = args.join(" ").toLowerCase();
-                        let msg = `>>> your character name is **${Name}**
+                const profile = await ProfileModel.findOne({ Tag: message.author.tag });
+                if (profile) {
+                    return message.channel.send(`tmro character already raixa ta sathi **${profile.Name}** vanne. name edit garne vaye use ***bantaba edit <newName>*** `)
+                }
+                else {
+                    const Username = message.author.username;
+                    const Tag = message.author.tag;
+                    const UserId = message.author.id;
+                    const Name = args.join(" ").toLowerCase();
+                    let msg = `>>> your character name is **${Name}**
 your **Race** will be selected as random.
 you can react on right to create your character or wrong to cancel`
 
-                        message.channel.send(msg).then(message => {
-                            message.react('✅')
-                            message.react('❎');
-                            client.on('messageReactionAdd', (reaction, user) => {
-                                if (user.bot) {
-                                    return
-                                }
-                                if (reaction.emoji.name === '✅') {
-                                    if (user.id === UserId) {
-                                        const newProfile = new ProfileModel({});
-                                        newProfile.Name = Name;
-                                        newProfile.UserId = UserId;
-                                        newProfile.Tag = Tag;
-                                        newProfile.UserName = Username;
-                                        newProfile.Race = 'KothiWala'
-                                        newProfile.save((err, saved) => {
-                                            if (err) {
-                                                message.delete()
-                                                return message.channel.send('database ma rakhnu ma kharabi aayo paxi try garnu hola')
-                                            } else {
-                                                message.delete()
-                                                return message.channel.send(`aja dekhi tmro name ${Name} yaad rakha natra ***bantaba profile*** garera hera`)
-                                            }
-
-                                        })
-                                    }
-                                }
-
-
-                                if (reaction.emoji.name === '❎') {
-                                    if (user.id === UserId) {
-                                        message.delete()
-                                        return message.channel.send('arko pali banau hai dost aile lai nabanayeni')
-                                    }
-                                }
-                            })
-                        })
-                            .catch(e => console.log(e))
-                    }
-
-
-
-                })
-
-            }
-            if (command === 'laugh') {
-                return message.react('😂')
-            }
-            if (command === 'angry') {
-                return message.react('😡')
-            }
-            if (command === 'sad') {
-                return message.react('😔')
-            }
-            if (command === 'sleep') {
-                return message.react('😴')
-            }
-            if (command === 'clap') {
-                return message.react('👏')
-            }
-            if (command === 'ok') {
-                return message.react('👍')
-            }
-
-
-            if (command === 'profile') {
-                const profile = await ProfileModel.find({ Tag: message.author.tag });
-                if (!profile[0]) {
-                    return message.channel.send('character banau suruma use ***bantaba create <name>***')
-                }
-                const canvas = Canvas.createCanvas(800, 740);
-
-                const ctx = canvas.getContext('2d');
-                let backgroundUrl = profile[0].ImageUrl === 'X-URL' ? './wallpaper.jpg' : profile[0].ImageUrl
-                const background = await Canvas.loadImage(backgroundUrl);
-                ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-
-                ctx.strokeStyle = '#0933ad';
-                ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
-                ctx.font = applyText(canvas, profile[0].Name)
-                ctx.fillStyle = '#433f4a';
-                ctx.fillText(`Name: ${profile[0].Name}`, 250, 100);
-                ctx.fillText(`Race: ${profile[0].Race}`, 250, 170);
-                ctx.fillText(`$${profile[0].Gold}`, 360, 250);
-                ctx.fillText(`Guild: ${profile[0].Guild}`, 50, 350);
-                ctx.fillText(`Lvl: ${profile[0].Level}`, 50, 420);
-                ctx.fillText(`Tag: ${profile[0].Tag}`, 50, 490);
-                ctx.fillText(`Status: ${profile[0].Status}`, 50, 560);
-                ctx.fillText(`ATK: ${profile[0].Attack}`, 300, 420)
-                ctx.fillText(`DEF: ${profile[0].Defense}`, 550, 420);
-                ctx.fillText(`GOD: ${profile[0].God}`, 50, 630);
-                ctx.fillText(`Married: ${profile[0].IsMarried}`, 50, 700);
-                if (profile[0].SteamID) {
-                    ctx.fillText(`Steam ID: ${profile[0].SteamID}`, 360, 630);
-                }
-
-
-
-                const goldBagUrl = 'https://cdn.imgbin.com/17/2/9/imgbin-money-bag-money-bag-gold-coin-lakshmi-gold-coin-4R7yB5ZRN4q58X9CNLG21yvHe.jpg'
-                const goldBag = await Canvas.loadImage(goldBagUrl);
-                ctx.drawImage(goldBag, 270, 200, 70, 70);
-
-                // Pick up the pen
-                ctx.beginPath();
-                // Start the arc to form a circle
-                ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
-                // Put the pen down
-                ctx.closePath();
-                // Clip off the region you drew on
-                ctx.clip();
-
-                const avatar = await Canvas.loadImage(message.author.displayAvatarURL({ format: 'jpg' }));
-                ctx.drawImage(avatar, 25, 25, 200, 200);
-
-
-
-
-                const attachment = new MessageAttachment(canvas.toBuffer(), 'profile-image.png');
-
-                return message.channel.send(attachment);
-            }
-
-            if (command === 'edit') {
-                if (!args.length) return message.channel.send('newName ni deu sathi chado');
-                ProfileModel.findOne({
-                    Tag: message.author.tag
-                }).exec().then(profile => {
-                    if (profile) {
-                        const oldName = profile.Name;
-                        const newName = args.join(" ");
-                        profile.Name = newName
-                        profile.save((err, saved) => {
-                            if (err) {
-                                console.log(err);
+                    message.channel.send(msg).then(message => {
+                        message.react('✅')
+                        message.react('❎');
+                        client.on('messageReactionAdd', (reaction, user) => {
+                            if (user.bot) {
+                                return
                             }
-                            else {
-                                return message.channel.send(`tmro name **${oldName}** bata aba **${saved.Name}** vayo la moj gara`)
+                            if (reaction.emoji.name === '✅') {
+                                if (user.id === UserId) {
+                                    const newProfile = new ProfileModel({});
+                                    newProfile.Name = Name;
+                                    newProfile.UserId = UserId;
+                                    newProfile.Tag = Tag;
+                                    newProfile.UserName = Username;
+                                    newProfile.Race = 'KothiWala'
+                                    newProfile.save((err, saved) => {
+                                        if (err) {
+                                            message.delete()
+                                            return message.channel.send('database ma rakhnu ma kharabi aayo paxi try garnu hola')
+                                        } else {
+                                            message.delete()
+                                            return message.channel.send(`aja dekhi tmro name ${Name} yaad rakha natra ***bantaba profile*** garera hera`)
+                                        }
+
+                                    })
+                                }
+                            }
+
+
+                            if (reaction.emoji.name === '❎') {
+                                if (user.id === UserId) {
+                                    message.delete()
+                                    return message.channel.send('arko pali banau hai dost aile lai nabanayeni')
+                                }
                             }
                         })
+                    })
+
+                }
+
+            
+
+            }
+if (command === 'laugh') {
+    return message.react('😂')
+}
+if (command === 'angry') {
+    return message.react('😡')
+}
+if (command === 'sad') {
+    return message.react('😔')
+}
+if (command === 'sleep') {
+    return message.react('😴')
+}
+if (command === 'clap') {
+    return message.react('👏')
+}
+if (command === 'ok') {
+    return message.react('👍')
+}
+
+
+if (command === 'profile') {
+    const profile = await ProfileModel.find({ Tag: message.author.tag });
+    if (!profile[0]) {
+        return message.channel.send('character banau suruma use ***bantaba create <name>***')
+    }
+    const canvas = Canvas.createCanvas(800, 740);
+
+    const ctx = canvas.getContext('2d');
+    let backgroundUrl = profile[0].ImageUrl === 'X-URL' ? './wallpaper.jpg' : profile[0].ImageUrl
+    const background = await Canvas.loadImage(backgroundUrl);
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = '#0933ad';
+    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font = applyText(canvas, profile[0].Name)
+    ctx.fillStyle = '#433f4a';
+    ctx.fillText(`Name: ${profile[0].Name}`, 250, 100);
+    ctx.fillText(`Race: ${profile[0].Race}`, 250, 170);
+    ctx.fillText(`$${profile[0].Gold}`, 360, 250);
+    ctx.fillText(`Guild: ${profile[0].Guild}`, 50, 350);
+    ctx.fillText(`Lvl: ${profile[0].Level}`, 50, 420);
+    ctx.fillText(`Tag: ${profile[0].Tag}`, 50, 490);
+    ctx.fillText(`Status: ${profile[0].Status}`, 50, 560);
+    ctx.fillText(`ATK: ${profile[0].Attack}`, 300, 420)
+    ctx.fillText(`DEF: ${profile[0].Defense}`, 550, 420);
+    ctx.fillText(`GOD: ${profile[0].God}`, 50, 630);
+    ctx.fillText(`Married: ${profile[0].IsMarried}`, 50, 700);
+    if (profile[0].SteamID) {
+        ctx.fillText(`Steam ID: ${profile[0].SteamID}`, 360, 630);
+    }
+
+
+
+    const goldBagUrl = 'https://cdn.imgbin.com/17/2/9/imgbin-money-bag-money-bag-gold-coin-lakshmi-gold-coin-4R7yB5ZRN4q58X9CNLG21yvHe.jpg'
+    const goldBag = await Canvas.loadImage(goldBagUrl);
+    ctx.drawImage(goldBag, 270, 200, 70, 70);
+
+    // Pick up the pen
+    ctx.beginPath();
+    // Start the arc to form a circle
+    ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
+    // Put the pen down
+    ctx.closePath();
+    // Clip off the region you drew on
+    ctx.clip();
+
+    const avatar = await Canvas.loadImage(message.author.displayAvatarURL({ format: 'jpg' }));
+    ctx.drawImage(avatar, 25, 25, 200, 200);
+
+
+
+
+    const attachment = new MessageAttachment(canvas.toBuffer(), 'profile-image.png');
+
+    return message.channel.send(attachment);
+}
+
+if (command === 'edit') {
+    if (!args.length) return message.channel.send('newName ni deu sathi chado');
+    ProfileModel.findOne({
+        Tag: message.author.tag
+    }).exec().then(profile => {
+        if (profile) {
+            const oldName = profile.Name;
+            const newName = args.join(" ");
+            profile.Name = newName
+            profile.save((err, saved) => {
+                if (err) {
+                    console.log(err);
+                }
+                else {
+                    return message.channel.send(`tmro name **${oldName}** bata aba **${saved.Name}** vayo la moj gara`)
+                }
+            })
+        } else {
+            return message.channel.send('xaina profile nai k ko edit hau')
+        }
+    }).catch(e => console.log(e))
+}
+
+if (command === 'image') {
+    if (!args.length) {
+        return message.channel.send('image ko url ni deu sathi')
+    }
+    const url = args.join(" ");
+
+    if (await isImageURL(url)) {
+        ProfileModel.findOne({
+            Tag: message.author.tag
+        }).then(profile => {
+            if (profile) {
+                profile.ImageUrl = url
+                profile.save((err, saved) => {
+                    if (err) {
+                        console.log(err)
                     } else {
-                        return message.channel.send('xaina profile nai k ko edit hau')
+                        return message.channel.send('image set gariyo aba ***bantaba profile*** garera check gara')
                     }
-                }).catch(e => console.log(e))
+                })
+            } else {
+                return message.channel.send('profile banau suruma')
             }
+        }).catch(e => console.log(e))
+    } else {
+        return message.channel.send('image ko url valid xaina sathi thik url pathau hai natra hudeina')
+    }
+}
+if (command === 'dota') {
+    if (!args.length) {
+        return message.channel.send('steam id deu sathi')
+    }
+    const id = args.join(" ")
+    Axios.get(`https://api.opendota.com/api/players/${id}`)
+        .then((data) => {
+            if (typeof data.data.profile !== 'object') return message.channel.send('vetena tmro profile sathi data publicly expose gara dota kholera')
+            const dota2Profile = new MessageEmbed()
+                .setColor('#0099ff')
+                .setTitle('Dota 2')
+                .setAuthor(`${data.data.profile.personaname}`, `${data.data.profile.avatar}`)
+                .addFields(
+                    { name: 'MMR', value: `${data.data.mmr_estimate.estimate}` },
 
-            if (command === 'image') {
-                if (!args.length) {
-                    return message.channel.send('image ko url ni deu sathi')
-                }
-                const url = args.join(" ");
+                )
+                .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
 
-                if (await isImageURL(url)) {
-                    ProfileModel.findOne({
-                        Tag: message.author.tag
-                    }).then(profile => {
-                        if (profile) {
-                            profile.ImageUrl = url
-                            profile.save((err, saved) => {
-                                if (err) {
-                                    console.log(err)
-                                } else {
-                                    return message.channel.send('image set gariyo aba ***bantaba profile*** garera check gara')
-                                }
-                            })
-                        } else {
-                            return message.channel.send('profile banau suruma')
-                        }
-                    }).catch(e => console.log(e))
+            return message.channel.send(dota2Profile)
+        })
+        .catch(e => console.log(e))
+
+}
+
+if (command === 'dota2') {
+    if (!args.length) {
+
+        return message.channel.send('type **bantaba dota2 match 1** type match 1 for latest game ani tespaxi ko game haru chaiyo vane match2 kita match 3 number badaudei jau')
+    }
+    if (args[0] === 'match') {
+        const user = await ProfileModel.findOne({ Tag: message.author.tag });
+        if (!user.SteamID) {
+            return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
+        }
+        const id = user.SteamID;
+        args.shift();
+        if (!args.length) {
+            return message.channel.send('number xutexa numbber deu 1 to 100 samma matra')
+        }
+        const matchNumber = args[0];
+        if (matchNumber >= 1 && matchNumber <= 10000) {
+
+
+            const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
+            const author = await Axios.get(`https://api.opendota.com/api/players/${id}`);
+
+            const stat = data[matchNumber - 1];
+            if (!stat) {
+                return message.channel.send('dherei purano game raixa vetindeina yesko dost')
+            }
+            user.MatchID = stat.match_id;
+            user.HeroID = stat.hero_id;
+            await user.save();
+            const heroId = stat.hero_id;
+            const player_slot = stat.player_slot;
+            const radiant_win = stat.radiant_win;
+
+            const duration = moment.utc(stat.duration * 1000).format('H:mm:ss');
+            let result = ''
+            let Team = ''
+            if (player_slot >= 0 && player_slot <= 127) {
+                Team = 'Radiant'
+                if (radiant_win) {
+                    result = 'Win'
                 } else {
-                    return message.channel.send('image ko url valid xaina sathi thik url pathau hai natra hudeina')
+                    result = 'Loss'
                 }
-            }
-            if (command === 'dota') {
-                if (!args.length) {
-                    return message.channel.send('steam id deu sathi')
-                }
-                const id = args.join(" ")
-                Axios.get(`https://api.opendota.com/api/players/${id}`)
-                    .then((data) => {
-                        if (typeof data.data.profile !== 'object') return message.channel.send('vetena tmro profile sathi data publicly expose gara dota kholera')
-                        const dota2Profile = new MessageEmbed()
-                            .setColor('#0099ff')
-                            .setTitle('Dota 2')
-                            .setAuthor(`${data.data.profile.personaname}`, `${data.data.profile.avatar}`)
-                            .addFields(
-                                { name: 'MMR', value: `${data.data.mmr_estimate.estimate}` },
-
-                            )
-                            .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
-
-                        return message.channel.send(dota2Profile)
-                    })
-                    .catch(e => console.log(e))
-
-            }
-
-            if (command === 'dota2') {
-                if (!args.length) {
-
-                    return message.channel.send('type **bantaba dota2 match 1** type match 1 for latest game ani tespaxi ko game haru chaiyo vane match2 kita match 3 number badaudei jau')
-                }
-                if (args[0] === 'match') {
-                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                    if (!user.SteamID) {
-                        return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
-                    }
-                    const id = user.SteamID;
-                    args.shift();
-                    if (!args.length) {
-                        return message.channel.send('number xutexa numbber deu 1 to 100 samma matra')
-                    }
-                    const matchNumber = args[0];
-                    if (matchNumber >= 1 && matchNumber <= 10000) {
-
-
-                        const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
-                        const author = await Axios.get(`https://api.opendota.com/api/players/${id}`);
-
-                        const stat = data[matchNumber - 1];
-                        if (!stat) {
-                            return message.channel.send('dherei purano game raixa vetindeina yesko dost')
-                        }
-                        user.MatchID = stat.match_id;
-                        user.HeroID = stat.hero_id;
-                        await user.save();
-                        const heroId = stat.hero_id;
-                        const player_slot = stat.player_slot;
-                        const radiant_win = stat.radiant_win;
-
-                        const duration = moment.utc(stat.duration * 1000).format('H:mm:ss');
-                        let result = ''
-                        let Team = ''
-                        if (player_slot >= 0 && player_slot <= 127) {
-                            Team = 'Radiant'
-                            if (radiant_win) {
-                                result = 'Win'
-                            } else {
-                                result = 'Loss'
-                            }
-                        } else {
-                            Team = 'Dire'
-                            if (radiant_win) {
-                                result = 'Loss'
-                            } else {
-                                result = 'Win'
-                            }
-                        }
-
-                        let heroName = '';
-                        let heroImage = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
-                        heroes.map(hero => {
-                            if (hero.id === heroId) {
-                                heroName = hero.localized_name
-                                if (hero.url_full_portrait) {
-                                    heroImage = hero.url_full_portrait
-                                }
-                            }
-                        })
-
-                        let partysize = '';
-                        if (stat.party_size === 1) {
-                            partysize = 'solo queue'
-                        } else {
-                            partysize = `${stat.party_size} man party`
-                        }
-                        const lobby = stat.lobby_type;
-                        const game = stat.game_mode;
-                        const personaname = author.data.profile.personaname;
-                        const avatar = author.data.profile.avatar;
-                        const dota2stats = new MessageEmbed()
-                            .setColor('#ad1005')
-                            .setTitle('Dota 2')
-                            .setAuthor(personaname, avatar)
-                            .setDescription(`Played as **${heroName}**`)
-
-                            .addFields(
-                                { name: lobby_type[lobby].name, value: `${game_mode[game].name}` },
-                                { name: 'Team', value: `**${Team}** (${result})` },
-                                { name: 'Kills', value: stat.kills, inline: true },
-                                { name: 'Deaths', value: stat.deaths, inline: true },
-                                { name: 'Assists', value: stat.assists, inline: true }
-                            )
-                            .setThumbnail(heroImage)
-                            .addFields(
-                                { name: 'Duration', value: duration, inline: true },
-                                { name: 'Party type', value: partysize, inline: true },
-                                { name: 'Leaver', value: stat.leaver_status ? 'leaver detected' : 'no leavers', inline: true }
-                            )
-
-
-
-                        return message.channel.send(dota2stats)
-                    }
-                    else {
-                        return message.channel.send("recent 10000 ota game ko matra stat vanxu ma")
-                    }
-                }
-                if (args[0] === 'hero') {
-                    args.shift();
-                    if (!args.length) return message.channel.send('use ***bantaba hero <heroName> <matchNumber> ***')
-                    const size = args.length;
-                    const matchNumber = args[size - 1];
-
-                    args.pop();
-                    let heroName = args.join(" ")
-                    let heroId;
-                    let heroImage = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
-                    heroes.map(hero => {
-                        if (hero.localized_name.toLowerCase() === heroName) {
-                            heroId = hero.id;
-                            heroName = hero.localized_name
-                            if (hero.url_vertical_portrait) {
-                                heroImage = hero.url_vertical_portrait
-                            }
-                        }
-                    })
-                    if (!heroId) {
-                        return message.channel.send('hero ko name milena jasto xa feri try')
-                    }
-
-                    const matches = [];
-                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                    const id = user.SteamID;
-                    const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
-                    data.forEach(match => {
-                        if (match.hero_id === heroId) {
-                            matches.push(match);
-                        };
-                    })
-                    if (!matches.length) {
-                        return message.channel.send('vetiyena yar game dherei purano raixa')
-                    }
-
-                    const stat = matches[matchNumber - 1];
-                    if (!stat) {
-                        return message.channel.send('purano raixa match vetiyena')
-                    }
-
-                    user.MatchID = stat.match_id;
-                    user.HeroID = stat.hero_id;
-                    await user.save();
-                    const player_slot = stat.player_slot;
-                    const radiant_win = stat.radiant_win;
-
-                    const duration = moment.utc(stat.duration * 1000).format('H:mm:ss');
-                    let result = ''
-                    let Team = ''
-                    if (player_slot >= 0 && player_slot <= 127) {
-                        Team = 'Radiant'
-                        if (radiant_win) {
-                            result = 'Win'
-                        } else {
-                            result = 'Loss'
-                        }
-                    } else {
-                        Team = 'Dire'
-                        if (radiant_win) {
-                            result = 'Loss'
-                        } else {
-                            result = 'Win'
-                        }
-                    }
-                    const author = await Axios.get(`https://api.opendota.com/api/players/${id}`);
-                    let partysize = '';
-                    if (stat.party_size === 1) {
-                        partysize = 'solo queue'
-                    } else {
-                        partysize = `${stat.party_size} man party`
-                    }
-                    const lobby = stat.lobby_type;
-                    const game = stat.game_mode;
-                    const personaname = author.data.profile.personaname;
-                    const avatar = author.data.profile.avatar;
-                    const dota2stats = new MessageEmbed()
-                        .setColor('#f5e56c')
-                        .setTitle('Dota 2')
-                        .setAuthor(personaname, avatar)
-                        .setDescription(`Played as **${heroName}**`)
-
-                        .addFields(
-                            { name: lobby_type[lobby].name, value: `${game_mode[game].name}` },
-                            { name: 'Team', value: `**${Team}** (${result})` },
-                            { name: 'Kills', value: stat.kills, inline: true },
-                            { name: 'Deaths', value: stat.deaths, inline: true },
-                            { name: 'Assists', value: stat.assists, inline: true }
-                        )
-                        .setThumbnail(heroImage)
-                        .addFields(
-                            { name: 'Duration', value: duration, inline: true },
-                            { name: 'Party type', value: partysize, inline: true },
-                            { name: 'Leaver', value: stat.leaver_status ? 'leaver detected' : 'no leavers', inline: true }
-                        )
-
-
-
-                    return message.channel.send(dota2stats)
-
-                }
-                if (args[0] === 'wl') {
-                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                    const id = user.SteamID;
-                    const wl = await Axios.get(`https://api.opendota.com/api/players/${id}/wl`);
-                    const profile = await Axios.get(`https://api.opendota.com/api/players/${id}`);
-                    const wlstat = new MessageEmbed()
-                        .setColor('#0099ff')
-                        .setTitle('Dota 2')
-                        .setAuthor(`${profile.data.profile.personaname}`, `${profile.data.profile.avatar}`)
-                        .addFields(
-                            { name: 'Win', value: `${wl.data.win}`, inline: true },
-                            { name: 'Lose', value: `${wl.data.lose}`, inline: true },
-
-                        )
-                        .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
-
-                    return message.channel.send(wlstat);
-                }
-
-            }
-            if (command === 'embed') {
-                const exampleEmbed = new MessageEmbed()
-                    .setColor('#0099ff')
-                    .setTitle('Some title')
-                    .setURL('https://discord.js.org/')
-                    .setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
-                    .setDescription('Some description here')
-                    .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
-                    .addFields(
-                        { name: 'Regular field title', value: 'Some value here' },
-                        { name: '\u200B', value: '\u200B' },
-                        { name: 'Inline field title', value: 'Some value here', inline: true },
-                        { name: 'Inline field title', value: 'Some value here', inline: true },
-                    )
-                    .addField('Inline field title', 'Some value here', true)
-                    .setImage('https://i.imgur.com/wSTFkRM.png')
-                    .setTimestamp()
-                    .setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
-
-                return message.channel.send(exampleEmbed)
-            }
-            if (command === 'steam') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                if (user.SteamID) {
-                    return message.channel.send('yo ek choti matra hannne command ho tmro steam id already xa change garne vaye contact Deepak Shrestha')
-                }
-                const steamId = args.join(" ");
-                user.SteamID = steamId;
-                await user.save();
-                return message.channel.send('Steam id set gariyo steam profile herne vaye use ***bantaba mmr***');
-            }
-
-            if (command === 'mmr') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                if (!user.SteamID) {
-                    return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
-                }
-                const id = user.SteamID;
-
-                const data = await Axios.get(`https://api.opendota.com/api/players/${id}`);
-
-                if (typeof data.data.profile !== 'object') return message.channel.send('vetena tmro profile sathi data publicly expose gara dota kholera')
-                const dota2Profile = new MessageEmbed()
-                    .setColor('#dd51ed')
-                    .setTitle('Dota 2')
-                    .setAuthor(`${data.data.profile.personaname}`, `${data.data.profile.avatar}`)
-                    .addFields(
-                        { name: 'MMR', value: `${data.data.mmr_estimate.estimate}` },
-
-                    )
-                    .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
-
-                return message.channel.send(dota2Profile);
-
-
-
-            }
-
-            if (command === 'items') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                if (!user) {
-                    return message.channel.send('suru ma match search gara ani balla tesko details dekhauxu ma')
-                }
-                const MatchID = user.MatchID;
-                const HeroID = user.HeroID;
-
-                const match = await Axios.get(`https://api.opendota.com/api/matches/${MatchID}`);
-                let playerInfo = {};
-                match.data.players.map(player => {
-                    if (player.hero_id === HeroID) {
-                        playerInfo = player;
-                    }
-                })
-
-                const canvas = Canvas.createCanvas(225, 150);
-                const ctx = canvas.getContext('2d');
-                const background = await Canvas.loadImage('https://media.tarkett-image.com/large/TH_25094225_25187225_001.jpg');
-                ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-
-                const Item1Url = getItemImage(playerInfo.item_0);
-                const Item1 = await Canvas.loadImage(Item1Url);
-                ctx.drawImage(Item1, 0, 0, 75, 50);
-                const Item2Url = getItemImage(playerInfo.item_1);
-                const Item2 = await Canvas.loadImage(Item2Url);
-                ctx.drawImage(Item2, 75, 0, 75, 50);
-                const Item3Url = getItemImage(playerInfo.item_2);
-                const Item3 = await Canvas.loadImage(Item3Url);
-                ctx.drawImage(Item3, 150, 0, 75, 50);
-                const Item4Url = getItemImage(playerInfo.item_3);
-                const Item4 = await Canvas.loadImage(Item4Url);
-                ctx.drawImage(Item4, 0, 50, 75, 50);
-                const Item5Url = getItemImage(playerInfo.item_4);
-                const Item5 = await Canvas.loadImage(Item5Url);
-                ctx.drawImage(Item5, 75, 50, 75, 50);
-                const Item6Url = getItemImage(playerInfo.item_5);
-                const Item6 = await Canvas.loadImage(Item6Url);
-                ctx.drawImage(Item6, 150, 50, 75, 50);
-
-                const backpackItem1Url = getItemImage(playerInfo.backpack_0);
-                const backpackItem1 = await Canvas.loadImage(backpackItem1Url);
-                ctx.drawImage(backpackItem1, 0, 110, 75, 40);
-                const backpackItem2Url = getItemImage(playerInfo.backpack_1);
-                const backpackItem2 = await Canvas.loadImage(backpackItem2Url);
-                ctx.drawImage(backpackItem2, 75, 110, 75, 40);
-                const backpackItem3Url = getItemImage(playerInfo.backpack_2);
-                const backpackItem3 = await Canvas.loadImage(backpackItem3Url);
-                ctx.drawImage(backpackItem3, 150, 110, 75, 40);
-
-
-                const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
-
-                return message.channel.send(attachment);
-            }
-
-            if (command === 'money') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                const gold = user.Gold;
-
-                return message.channel.send(`You currently have **$${gold}**, <@${message.author.id}>`)
-            }
-            if (command === 'economy') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                const gold = user.Gold;
-
-                return message.channel.send(`\`\`\`You currently have $${gold}\`\`\``)
-            }
-            if (command === 'richest') {
-                const users = await ProfileModel.find({}).sort({ Gold: -1 });
-                let msg = ''
-                users.forEach((user, index) => {
-                    msg = msg + `${index + 1}. \`${user.Name}\`, a character by \`${user.Tag}\` with **$${user.Gold}**
-                    `;
-                })
-                const richestPlayers = new MessageEmbed()
-                    .setColor("#0af568")
-                    .setTitle("The Richest Players of bantabaRPG")
-                    .setDescription(`${msg}`)
-
-                return message.channel.send(richestPlayers)
-            }
-            if (command === 'addxp') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                const id = user.SteamID;
-                const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
-                let earnedXP = 0;
-                if (user.recentMatchID) {
-                    if (user.recentMatchID === data[0].match_id) {
-                        return message.channel.send('xp already added xa feri new game khela sathi ani add gara');
-                    }
-                    earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, data[0].deaths, user.Level,data[0]);
-                    user.XP = user.XP + earnedXP;
-                    user.Gold = user.Gold + Math.round(earnedXP / 2);
-                    await user.save();
-                    const currentLevel = user.Level;
-                    const newLevel = levelUP(user.XP);
-                    let levelup = false;
-                    if (newLevel > currentLevel) {
-                        user.Level = newLevel;
-                        user.Gold = user.Gold + Math.round(newLevel * 2000);
-                        user.Attack = user.Attack + 1;
-                        user.Defense = user.Defense + 1;
-                        levelup = true;
-                    }
-                    user.recentMatchID = data[0].match_id;
-                    await user.save();
-                    const XPdetails = new MessageEmbed().setTitle('XP details')
-                        .setDescription(`Earned XP: ${earnedXP}
-                        You recieved **$${Math.round(earnedXP / 2)}** as a reward`);
-                    message.channel.send(XPdetails);
-                    if (levelup) {
-                        return message.channel.send(`:fireworks: Congratulation you leveled up to **${newLevel}**. You recieved **$${newLevel * 2000}** as a reward`)
-                    } else {
-                        return;
-                    }
-
-
+            } else {
+                Team = 'Dire'
+                if (radiant_win) {
+                    result = 'Loss'
                 } else {
-
-                    earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, data[0].deaths, user.Level,data[0]);
-                    user.XP = user.XP + earnedXP;
-                    user.Gold = user.Gold + Math.round(earnedXP / 2);
-                    await user.save();
-                    const currentLevel = user.Level;
-                    const newLevel = levelUP(user.XP);
-                    let levelup = false;
-                    if (newLevel > currentLevel) {
-                        user.Level = newLevel;
-                        user.Gold = user.Gold + Math.round(newLevel * 2000);
-                        user.Attack = user.Attack + 1;
-                        user.Defense = user.Defense + 1;
-                        levelup = true;
-                    }
-                    user.recentMatchID = data[0].match_id;
-                    await user.save();
-                    const XPdetails = new MessageEmbed().setTitle('XP details')
-                        .setDescription(`Earned XP: ${earnedXP}
-                        You recieved **$${Math.round(earnedXP / 2)}** as a reward`);
-                    message.channel.send(XPdetails);
-                    if (levelup) {
-                        return message.channel.send(`:fireworks: Congratulation you leveled up to **${newLevel}**. You recieved **$${newLevel * 2000}** as a reward`)
-                    } else {
-                        return;
-                    }
-                    //todo level up check
+                    result = 'Win'
                 }
-
             }
 
-            if (command === 'leaderboard') {
-                const users = await ProfileModel.find({}).sort({ XP: -1 });
-                let msg = ''
-                users.forEach((user, index) => {
-                    msg = msg + `${index + 1}. \`${user.Name}\`, a character by \`${user.Tag}\` with total XP: **${user.XP}**, Level: **${user.Level}**
+            let heroName = '';
+            let heroImage = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
+            heroes.map(hero => {
+                if (hero.id === heroId) {
+                    heroName = hero.localized_name
+                    if (hero.url_full_portrait) {
+                        heroImage = hero.url_full_portrait
+                    }
+                }
+            })
+
+            let partysize = '';
+            if (stat.party_size === 1) {
+                partysize = 'solo queue'
+            } else {
+                partysize = `${stat.party_size} man party`
+            }
+            const lobby = stat.lobby_type;
+            const game = stat.game_mode;
+            const personaname = author.data.profile.personaname;
+            const avatar = author.data.profile.avatar;
+            const dota2stats = new MessageEmbed()
+                .setColor('#ad1005')
+                .setTitle('Dota 2')
+                .setAuthor(personaname, avatar)
+                .setDescription(`Played as **${heroName}**`)
+
+                .addFields(
+                    { name: lobby_type[lobby].name, value: `${game_mode[game].name}` },
+                    { name: 'Team', value: `**${Team}** (${result})` },
+                    { name: 'Kills', value: stat.kills, inline: true },
+                    { name: 'Deaths', value: stat.deaths, inline: true },
+                    { name: 'Assists', value: stat.assists, inline: true }
+                )
+                .setThumbnail(heroImage)
+                .addFields(
+                    { name: 'Duration', value: duration, inline: true },
+                    { name: 'Party type', value: partysize, inline: true },
+                    { name: 'Leaver', value: stat.leaver_status ? 'leaver detected' : 'no leavers', inline: true }
+                )
+
+
+
+            return message.channel.send(dota2stats)
+        }
+        else {
+            return message.channel.send("recent 10000 ota game ko matra stat vanxu ma")
+        }
+    }
+    if (args[0] === 'hero') {
+        args.shift();
+        if (!args.length) return message.channel.send('use ***bantaba hero <heroName> <matchNumber> ***')
+        const size = args.length;
+        const matchNumber = args[size - 1];
+
+        args.pop();
+        let heroName = args.join(" ")
+        let heroId;
+        let heroImage = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU';
+        heroes.map(hero => {
+            if (hero.localized_name.toLowerCase() === heroName) {
+                heroId = hero.id;
+                heroName = hero.localized_name
+                if (hero.url_vertical_portrait) {
+                    heroImage = hero.url_vertical_portrait
+                }
+            }
+        })
+        if (!heroId) {
+            return message.channel.send('hero ko name milena jasto xa feri try')
+        }
+
+        const matches = [];
+        const user = await ProfileModel.findOne({ Tag: message.author.tag });
+        const id = user.SteamID;
+        const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
+        data.forEach(match => {
+            if (match.hero_id === heroId) {
+                matches.push(match);
+            };
+        })
+        if (!matches.length) {
+            return message.channel.send('vetiyena yar game dherei purano raixa')
+        }
+
+        const stat = matches[matchNumber - 1];
+        if (!stat) {
+            return message.channel.send('purano raixa match vetiyena')
+        }
+
+        user.MatchID = stat.match_id;
+        user.HeroID = stat.hero_id;
+        await user.save();
+        const player_slot = stat.player_slot;
+        const radiant_win = stat.radiant_win;
+
+        const duration = moment.utc(stat.duration * 1000).format('H:mm:ss');
+        let result = ''
+        let Team = ''
+        if (player_slot >= 0 && player_slot <= 127) {
+            Team = 'Radiant'
+            if (radiant_win) {
+                result = 'Win'
+            } else {
+                result = 'Loss'
+            }
+        } else {
+            Team = 'Dire'
+            if (radiant_win) {
+                result = 'Loss'
+            } else {
+                result = 'Win'
+            }
+        }
+        const author = await Axios.get(`https://api.opendota.com/api/players/${id}`);
+        let partysize = '';
+        if (stat.party_size === 1) {
+            partysize = 'solo queue'
+        } else {
+            partysize = `${stat.party_size} man party`
+        }
+        const lobby = stat.lobby_type;
+        const game = stat.game_mode;
+        const personaname = author.data.profile.personaname;
+        const avatar = author.data.profile.avatar;
+        const dota2stats = new MessageEmbed()
+            .setColor('#f5e56c')
+            .setTitle('Dota 2')
+            .setAuthor(personaname, avatar)
+            .setDescription(`Played as **${heroName}**`)
+
+            .addFields(
+                { name: lobby_type[lobby].name, value: `${game_mode[game].name}` },
+                { name: 'Team', value: `**${Team}** (${result})` },
+                { name: 'Kills', value: stat.kills, inline: true },
+                { name: 'Deaths', value: stat.deaths, inline: true },
+                { name: 'Assists', value: stat.assists, inline: true }
+            )
+            .setThumbnail(heroImage)
+            .addFields(
+                { name: 'Duration', value: duration, inline: true },
+                { name: 'Party type', value: partysize, inline: true },
+                { name: 'Leaver', value: stat.leaver_status ? 'leaver detected' : 'no leavers', inline: true }
+            )
+
+
+
+        return message.channel.send(dota2stats)
+
+    }
+    if (args[0] === 'wl') {
+        const user = await ProfileModel.findOne({ Tag: message.author.tag });
+        const id = user.SteamID;
+        const wl = await Axios.get(`https://api.opendota.com/api/players/${id}/wl`);
+        const profile = await Axios.get(`https://api.opendota.com/api/players/${id}`);
+        const wlstat = new MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle('Dota 2')
+            .setAuthor(`${profile.data.profile.personaname}`, `${profile.data.profile.avatar}`)
+            .addFields(
+                { name: 'Win', value: `${wl.data.win}`, inline: true },
+                { name: 'Lose', value: `${wl.data.lose}`, inline: true },
+
+            )
+            .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+
+        return message.channel.send(wlstat);
+    }
+
+}
+if (command === 'embed') {
+    const exampleEmbed = new MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle('Some title')
+        .setURL('https://discord.js.org/')
+        .setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
+        .setDescription('Some description here')
+        .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+        .addFields(
+            { name: 'Regular field title', value: 'Some value here' },
+            { name: '\u200B', value: '\u200B' },
+            { name: 'Inline field title', value: 'Some value here', inline: true },
+            { name: 'Inline field title', value: 'Some value here', inline: true },
+        )
+        .addField('Inline field title', 'Some value here', true)
+        .setImage('https://i.imgur.com/wSTFkRM.png')
+        .setTimestamp()
+        .setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
+
+    return message.channel.send(exampleEmbed)
+}
+if (command === 'steam') {
+    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+    if (user.SteamID) {
+        return message.channel.send('yo ek choti matra hannne command ho tmro steam id already xa change garne vaye contact Deepak Shrestha')
+    }
+    const steamId = args.join(" ");
+    user.SteamID = steamId;
+    await user.save();
+    return message.channel.send('Steam id set gariyo steam profile herne vaye use ***bantaba mmr***');
+}
+
+if (command === 'mmr') {
+    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+    if (!user.SteamID) {
+        return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
+    }
+    const id = user.SteamID;
+
+    const data = await Axios.get(`https://api.opendota.com/api/players/${id}`);
+
+    if (typeof data.data.profile !== 'object') return message.channel.send('vetena tmro profile sathi data publicly expose gara dota kholera')
+    const dota2Profile = new MessageEmbed()
+        .setColor('#dd51ed')
+        .setTitle('Dota 2')
+        .setAuthor(`${data.data.profile.personaname}`, `${data.data.profile.avatar}`)
+        .addFields(
+            { name: 'MMR', value: `${data.data.mmr_estimate.estimate}` },
+
+        )
+        .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
+
+    return message.channel.send(dota2Profile);
+
+
+
+}
+
+if (command === 'items') {
+    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+    if (!user) {
+        return message.channel.send('suru ma match search gara ani balla tesko details dekhauxu ma')
+    }
+    const MatchID = user.MatchID;
+    const HeroID = user.HeroID;
+
+    const match = await Axios.get(`https://api.opendota.com/api/matches/${MatchID}`);
+    let playerInfo = {};
+    match.data.players.map(player => {
+        if (player.hero_id === HeroID) {
+            playerInfo = player;
+        }
+    })
+
+    const canvas = Canvas.createCanvas(225, 150);
+    const ctx = canvas.getContext('2d');
+    const background = await Canvas.loadImage('https://media.tarkett-image.com/large/TH_25094225_25187225_001.jpg');
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+    const Item1Url = getItemImage(playerInfo.item_0);
+    const Item1 = await Canvas.loadImage(Item1Url);
+    ctx.drawImage(Item1, 0, 0, 75, 50);
+    const Item2Url = getItemImage(playerInfo.item_1);
+    const Item2 = await Canvas.loadImage(Item2Url);
+    ctx.drawImage(Item2, 75, 0, 75, 50);
+    const Item3Url = getItemImage(playerInfo.item_2);
+    const Item3 = await Canvas.loadImage(Item3Url);
+    ctx.drawImage(Item3, 150, 0, 75, 50);
+    const Item4Url = getItemImage(playerInfo.item_3);
+    const Item4 = await Canvas.loadImage(Item4Url);
+    ctx.drawImage(Item4, 0, 50, 75, 50);
+    const Item5Url = getItemImage(playerInfo.item_4);
+    const Item5 = await Canvas.loadImage(Item5Url);
+    ctx.drawImage(Item5, 75, 50, 75, 50);
+    const Item6Url = getItemImage(playerInfo.item_5);
+    const Item6 = await Canvas.loadImage(Item6Url);
+    ctx.drawImage(Item6, 150, 50, 75, 50);
+
+    const backpackItem1Url = getItemImage(playerInfo.backpack_0);
+    const backpackItem1 = await Canvas.loadImage(backpackItem1Url);
+    ctx.drawImage(backpackItem1, 0, 110, 75, 40);
+    const backpackItem2Url = getItemImage(playerInfo.backpack_1);
+    const backpackItem2 = await Canvas.loadImage(backpackItem2Url);
+    ctx.drawImage(backpackItem2, 75, 110, 75, 40);
+    const backpackItem3Url = getItemImage(playerInfo.backpack_2);
+    const backpackItem3 = await Canvas.loadImage(backpackItem3Url);
+    ctx.drawImage(backpackItem3, 150, 110, 75, 40);
+
+
+    const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
+
+    return message.channel.send(attachment);
+}
+
+if (command === 'money') {
+    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+    const gold = user.Gold;
+
+    return message.channel.send(`You currently have **$${gold}**, <@${message.author.id}>`)
+}
+if (command === 'economy') {
+    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+    const gold = user.Gold;
+
+    return message.channel.send(`\`\`\`You currently have $${gold}\`\`\``)
+}
+if (command === 'richest') {
+    const users = await ProfileModel.find({}).sort({ Gold: -1 });
+    let msg = ''
+    users.forEach((user, index) => {
+        msg = msg + `${index + 1}. \`${user.Name}\`, a character by \`${user.Tag}\` with **$${user.Gold}**
                     `;
-                })
-                const richestPlayers = new MessageEmbed()
-                    .setColor("#11096e")
-                    .setTitle("Top Dota2 players of BantabaRPG")
-                    .setDescription(`${msg}`)
+    })
+    const richestPlayers = new MessageEmbed()
+        .setColor("#0af568")
+        .setTitle("The Richest Players of bantabaRPG")
+        .setDescription(`${msg}`)
 
-                return message.channel.send(richestPlayers)
-            }
+    return message.channel.send(richestPlayers)
+}
+if (command === 'addxp') {
+    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+    const id = user.SteamID;
+    const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
+    let earnedXP = 0;
+    if (user.recentMatchID) {
+        if (user.recentMatchID === data[0].match_id) {
+            return message.channel.send('xp already added xa feri new game khela sathi ani add gara');
+        }
+        earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, data[0].deaths, user.Level, data[0]);
+        user.XP = user.XP + earnedXP;
+        user.Gold = user.Gold + Math.round(earnedXP / 2);
+        await user.save();
+        const currentLevel = user.Level;
+        const newLevel = levelUP(user.XP);
+        let levelup = false;
+        if (newLevel > currentLevel) {
+            user.Level = newLevel;
+            user.Gold = user.Gold + Math.round(newLevel * 2000);
+            user.Attack = user.Attack + 1;
+            user.Defense = user.Defense + 1;
+            levelup = true;
+        }
+        user.recentMatchID = data[0].match_id;
+        await user.save();
+        const XPdetails = new MessageEmbed().setTitle('XP details')
+            .setDescription(`Earned XP: ${earnedXP}
+                        You recieved **$${Math.round(earnedXP / 2)}** as a reward`);
+        message.channel.send(XPdetails);
+        if (levelup) {
+            return message.channel.send(`:fireworks: Congratulation you leveled up to **${newLevel}**. You recieved **$${newLevel * 2000}** as a reward`)
+        } else {
+            return;
+        }
 
-            if (command === 'formula') {
-                const formula = new MessageEmbed()
-                    .setTitle('XP Formula')
-                    .setDescription(`\`xp = (Game duration/7) x CurrentLevel+ ((kills+Assists)/deaths) x 100\`
+
+    } else {
+
+        earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, data[0].deaths, user.Level, data[0]);
+        user.XP = user.XP + earnedXP;
+        user.Gold = user.Gold + Math.round(earnedXP / 2);
+        await user.save();
+        const currentLevel = user.Level;
+        const newLevel = levelUP(user.XP);
+        let levelup = false;
+        if (newLevel > currentLevel) {
+            user.Level = newLevel;
+            user.Gold = user.Gold + Math.round(newLevel * 2000);
+            user.Attack = user.Attack + 1;
+            user.Defense = user.Defense + 1;
+            levelup = true;
+        }
+        user.recentMatchID = data[0].match_id;
+        await user.save();
+        const XPdetails = new MessageEmbed().setTitle('XP details')
+            .setDescription(`Earned XP: ${earnedXP}
+                        You recieved **$${Math.round(earnedXP / 2)}** as a reward`);
+        message.channel.send(XPdetails);
+        if (levelup) {
+            return message.channel.send(`:fireworks: Congratulation you leveled up to **${newLevel}**. You recieved **$${newLevel * 2000}** as a reward`)
+        } else {
+            return;
+        }
+        //todo level up check
+    }
+
+}
+
+if (command === 'leaderboard') {
+    const users = await ProfileModel.find({}).sort({ XP: -1 });
+    let msg = ''
+    users.forEach((user, index) => {
+        msg = msg + `${index + 1}. \`${user.Name}\`, a character by \`${user.Tag}\` with total XP: **${user.XP}**, Level: **${user.Level}**
+                    `;
+    })
+    const richestPlayers = new MessageEmbed()
+        .setColor("#11096e")
+        .setTitle("Top Dota2 players of BantabaRPG")
+        .setDescription(`${msg}`)
+
+    return message.channel.send(richestPlayers)
+}
+
+if (command === 'formula') {
+    const formula = new MessageEmbed()
+        .setTitle('XP Formula')
+        .setDescription(`\`xp = (Game duration/7) x CurrentLevel+ ((kills+Assists)/deaths) x 100\`
 
                     Case **Win**:
-                         \`xp = xp + 25% of xp\`
+                        For Ranked Games: \`xp = xp + 40% of xp\`
+                        For Normal Games: \`xp = xp + 25% of xp\`
 
                     Case **Loss**:
-                         \`xp = xp - 40% of xp\` `)
-                return message.channel.send(formula)
-            }
+                        For Ranked Games: \`xp = xp - 40% of xp\`
+                        For Normal Games: \`xp = xp - 60% of xp\`     
+                     `)
+    return message.channel.send(formula)
+}
 
-            else {
-                const msg = args.join(" ");
-                message.channel.send(`bantaba bot ko dictionary ma **${command} ${msg}** vanne sabda raina raixa`)
-            }
+if (command === 'xp') {
+    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+    return message.channel.send(`You currently have **${user.XP}** which means you are on level **${user.Level}**`)
+}
+if (command === 'help') {
+    const msg = new MessageEmbed()
+        .setColor('#7ef2ea')
+        .setTitle('How to play')
+        .setDescription(`1. First thing first lets create a character with \` ~create [yourName] \`
+        2.Let's add steam account using \` ~steam [yoursteamID] \`
+        3.Add your xp,earn rewards and level up after every dota game using \` ~addxp \`
+        4.That's it. You can explore more commands using \` ~advanced \``)
+
+    return message.channel.send(msg);
+}
+if (command === 'advanced') {
+    const msg = new MessageEmbed()
+        .setColor('#7ef2ea')
+        .setTitle('Getting advanced')
+        .setDescription(`1.There are 6 prefix for the commands \` ~ # bantaba Bantaba bantawa Bantawa \`
+        2.You can change your profile's background image using \` ~image [validImageUrl] \`
+        3.Check you current Gold using \` ~money \` or \` ~economy \`
+        4.Gamble the gold using \` ~flip [heads/tails] [amount]\`
+        5.Check your ranking among richest players using \` ~richest \`
+        6.Check your dota2 profile using \` ~mmr \`
+        7.Check dota2 profile for any steam id using \` ~dota [steamID] \`
+        8.Search your dota2 games using \` ~dota2 match [matchNumber] \`
+        9.Search based on heroes using \` ~dota2 hero [heroName] [matchNumber] \`
+        10.Also check your item build using \` ~items \`
+        10.Check your overall win loss stats using \` ~dota2 wl \`
+        11.Compare your xp with all the players using \` ~leaderboard \`
+        12.Check how xp is being calculated after every game using \` ~formula \`
+        13.This is not everything there is but hope this sums up for now.
+        **Good Luck Have Fun** by BantabaBot`);
+
+    return message.channel.send(msg);
+}
+else {
+    const msg = args.join(" ");
+    message.channel.send(`bantaba bot ko dictionary ma **${command} ${msg}** vanne sabda raina raixa`)
+}
         }
 
     }
     catch (e) {
-        console.log(e);
-    }
+    console.log(e);
+}
 
 
 
@@ -1041,10 +1074,18 @@ const getXP = (duration, kill, assists, deaths, level, stat) => {
         }
     }
     xp = (duration / 7) * level + ((kill + assists) / deaths) * 100;
-    if(result === 'Win'){
-        xp = xp + 0.25*xp;
-    }else {
-        xp = xp - 0.4*xp;
+    if (result === 'Win' ) {
+        if(stat.lobby_type===7){
+            xp = xp + 0.4 * xp;
+        }else{
+            xp = xp + 0.25 * xp;
+        }
+    } else {
+        if(stat.lobby_type === 7){
+            xp = xp - 0.6 * xp;
+        }else{
+            xp = xp - 0.4 * xp;
+        }
     }
     return Math.trunc(xp);
 }
