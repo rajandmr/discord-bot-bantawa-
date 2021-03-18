@@ -8,7 +8,7 @@ const game_mode = require('./game_mode');
 const lobby_type = require('./lobby_type');
 const heroes = require('./heroes');
 const dota_items = require('./dota_items_old');
-const fs =require('fs');
+const fs = require('fs');
 
 const { Client, MessageAttachment, MessageEmbed } = require('discord.js');
 
@@ -45,77 +45,77 @@ client.on('message', async (message) => {
         return;
     }
     if (message.content === 'hello bantawa') {
-        message.channel.send('bantawa haina kta ho bantaba ho. la aba feri vana')
+        return message.channel.send('bantawa haina kta ho bantaba ho. la aba feri vana')
     }
     if (message.content === 'hello bantaba') {
         var a = Math.floor((Math.random() * 3))
         if (a === 0) {
-            message.channel.send('k xa yar kta ho scam ma pariyo nita aaja')
+            return message.channel.send('k xa yar kta ho scam ma pariyo nita aaja')
         }
         if (a === 1) {
-            message.channel.send('aau kta ho dota kheldim')
+            return message.channel.send('aau kta ho dota kheldim')
         }
         if (a === 2) {
-            message.channel.send('mai ho sapai vanda pro')
+            return message.channel.send('mai ho sapai vanda pro')
         }
     }
     if (message.content === 'dota khelam bantawa') {
-        message.channel.send('khoki lagiraxa malai ma alik paxi aauxu')
+        return message.channel.send('khoki lagiraxa malai ma alik paxi aauxu')
     }
     if (message.content === 'bantaba stream') {
         var a = Math.floor((Math.random() * 3));
         if (a === 0) {
-            message.channel.send('playing from data')
+            return message.channel.send('playing from data')
         }
         if (a === 1) {
-            message.channel.send('net lag xa yar adkiraxa')
+            return message.channel.send('net lag xa yar adkiraxa')
         }
         if (a === 2) {
-            message.channel.send('lang nagar muji harirako bela')
+            return message.channel.send('lang nagar muji harirako bela')
         }
 
     }
     if (message.content === 'bantaba pro') {
-        message.channel.send('bantaba pro the divine killer vana malai')
+        return message.channel.send('bantaba pro the divine killer vana malai')
     }
     if (message.content === 'bantawa pro') {
-        message.channel.send('ancient divine haru lai ta ma breakfast ma khanxu')
+        return message.channel.send('ancient divine haru lai ta ma breakfast ma khanxu')
     }
     if (message.content === 'bantawa noob') {
-        message.channel.send('yo sab content ko lagi ho yar')
+        return message.channel.send('yo sab content ko lagi ho yar')
     }
     if (message.content === 'bantaba noob') {
-        message.channel.send('thik xa malai yiniharu ko khela manparyo')
+        return message.channel.send('thik xa malai yiniharu ko khela manparyo')
     }
     if (message.content === 'bantawa name') {
-        message.channel.send('yugesh chandra bantawa rai')
+        return message.channel.send('yugesh chandra bantawa rai')
     }
     if (message.content === 'bantawa rank') {
-        message.channel.send('legend 2 on main but plays are of herald player')
+        return message.channel.send('legend 2 on main but plays are of herald player')
     }
     if (message.content === 'bantaba virgin') {
         var a = Math.floor(Math.random() * 2);
         if (a === 0) {
-            message.channel.send('virgin re gau ma malai call boy vanthyo')
+            return message.channel.send('virgin re gau ma malai call boy vanthyo')
         }
         if (a === 1) {
-            message.channel.send('mero gau ko escort boy ho ma')
+            return message.channel.send('mero gau ko escort boy ho ma')
         }
     }
     if (message.content === 'miracle miracle') {
         message.channel.send('ID: Nepdeathdust')
-        message.channel.send('password: Deathdust007')
+        return message.channel.send('password: Deathdust007')
     }
     if (message.content === 'ravi oad') {
         message.channel.send('ID: gyabihangrai3')
-        message.channel.send('password: ayush7117')
+        return message.channel.send('password: ayush7117')
     }
     if (message.content === 'play dota') {
         message.channel.send('ID: sudesh323')
-        message.channel.send('password: sudesh9840067324')
+        return message.channel.send('password: sudesh9840067324')
     }
     if (message.content === 'hello') {
-        message.reply('hello')
+        return message.reply('hello')
     }
 
 
@@ -128,7 +128,7 @@ client.on('message', async (message) => {
             if (command === 'play') {
                 const voiceChannel = message.member.voice.channel;
                 if (!voiceChannel) {
-                    message.channel.send('Geet sunna manxa vane voice channel ma basa yar k ho yesto para')
+                    return message.channel.send('Geet sunna manxa vane voice channel ma basa yar k ho yesto para')
                 }
                 const permissions = voiceChannel.permissionsFor(message.client.user);
                 if (!permissions.has('CONNECT')) return message.channel.send('tmro permission raina raixa bot lai connect garne');
@@ -152,7 +152,7 @@ client.on('message', async (message) => {
                         })
                     await message.channel.send(`:musical_note::musical_note: Now playing ***${video.title} ${video.url}***`)
                 } else {
-                    message.channel.send("youtube ma video vetena")
+                    return message.channel.send("youtube ma video vetena")
                 }
 
 
@@ -161,13 +161,13 @@ client.on('message', async (message) => {
                 message.member.voice.channel.leave();
                 var a = Math.floor(Math.random() * 3);
                 if (a === 0) {
-                    message.channel.send('ok guys later')
+                    return message.channel.send('ok guys later')
                 }
                 if (a === 1) {
-                    message.channel.send('gako aile lai ma')
+                    return message.channel.send('gako aile lai ma')
                 }
                 if (a === 2) {
-                    message.channel.send('paxi geet sunne bela bolau')
+                    return message.channel.send('paxi geet sunne bela bolau')
                 }
 
             }
@@ -181,8 +181,8 @@ client.on('message', async (message) => {
                     if (amount >= 0 && amount <= 1000000) {
 
                         const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                        if(!user){
-                            message.channel.send('character banau suruma, user ***bantaba create <character>***')
+                        if (!user) {
+                            return message.channel.send('character banau suruma, user ***bantaba create <character>***')
                         }
                         if (amount <= user.Gold) {
                             var a = Math.floor(Math.random() * 2);
@@ -199,18 +199,18 @@ client.on('message', async (message) => {
                         } else {
                             return message.channel.send('Garib raixau sathi tme ta')
                         }
-                    }   
+                    }
 
                 }
-                else if(args[0]==='tails'){
+                else if (args[0] === 'tails') {
                     args.shift();
                     const amount = Number(args.join(" "));
                     console.log(amount);
                     if (amount >= 0 && amount <= 1000000) {
 
                         const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                        if(!user){
-                            message.channel.send('character banau suruma, user ***bantaba create <character>***')
+                        if (!user) {
+                            return message.channel.send('character banau suruma, user ***bantaba create <character>***')
                         }
                         if (amount <= user.Gold) {
                             var a = Math.floor(Math.random() * 2);
@@ -227,13 +227,13 @@ client.on('message', async (message) => {
                         } else {
                             return message.channel.send('Garib raixau sathi tme ta')
                         }
-                    }   
+                    }
                 }
-                 else if (amount >= 0 && amount <= 1000000) {
+                else if (amount >= 0 && amount <= 1000000) {
 
                     const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                    if(!user){
-                        message.channel.send('character banau suruma, user ***bantaba create <character>***')
+                    if (!user) {
+                        return message.channel.send('character banau suruma, user ***bantaba create <character>***')
                     }
                     if (amount <= user.Gold) {
                         var a = Math.floor(Math.random() * 2);
@@ -260,7 +260,7 @@ client.on('message', async (message) => {
             }
 
             if (command === 'check') {
-                message.channel.send(`${message.author.tag}`)
+                return message.channel.send(`${message.author.tag}`)
             }
 
             if (command === 'create') {
@@ -302,10 +302,10 @@ you can react on right to create your character or wrong to cancel`
                                         newProfile.save((err, saved) => {
                                             if (err) {
                                                 message.delete()
-                                                message.channel.send('database ma rakhnu ma kharabi aayo paxi try garnu hola')
+                                                return message.channel.send('database ma rakhnu ma kharabi aayo paxi try garnu hola')
                                             } else {
                                                 message.delete()
-                                                message.channel.send(`aja dekhi tmro name ${Name} yaad rakha natra ***bantaba profile*** garera hera`)
+                                                return message.channel.send(`aja dekhi tmro name ${Name} yaad rakha natra ***bantaba profile*** garera hera`)
                                             }
 
                                         })
@@ -316,7 +316,7 @@ you can react on right to create your character or wrong to cancel`
                                 if (reaction.emoji.name === '❎') {
                                     if (user.id === UserId) {
                                         message.delete()
-                                        message.channel.send('arko pali banau hai dost aile lai nabanayeni')
+                                        return message.channel.send('arko pali banau hai dost aile lai nabanayeni')
                                     }
                                 }
                             })
@@ -330,93 +330,81 @@ you can react on right to create your character or wrong to cancel`
 
             }
             if (command === 'laugh') {
-                message.react('😂')
+                return message.react('😂')
             }
             if (command === 'angry') {
-                message.react('😡')
+                return message.react('😡')
             }
             if (command === 'sad') {
-                message.react('😔')
+                return message.react('😔')
             }
             if (command === 'sleep') {
-                message.react('😴')
+                return message.react('😴')
             }
             if (command === 'clap') {
-                message.react('👏')
+                return message.react('👏')
             }
             if (command === 'ok') {
-                message.react('👍')
+                return message.react('👍')
             }
 
 
             if (command === 'profile') {
-                ProfileModel.find({
-                    Tag: message.author.tag
-                }).then(async (profile) => {
+                const profile = await ProfileModel.find({Tag:message.author.tag});
+                if (!profile[0]) {
+                    return message.channel.send('character banau suruma use ***bantaba create <name>***')
+                }
+                const canvas = Canvas.createCanvas(800, 740);
 
+                const ctx = canvas.getContext('2d');
+                let backgroundUrl = profile[0].ImageUrl === 'X-URL' ? './wallpaper.jpg' : profile[0].ImageUrl
+                const background = await Canvas.loadImage(backgroundUrl);
+                ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-                    try {
-                        if (!profile[0]) {
-                            return message.channel.send('character banau suruma use ***bantaba create <name>***')
-                        }
-                        const canvas = Canvas.createCanvas(800, 740);
+                ctx.strokeStyle = '#0933ad';
+                ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
-                        const ctx = canvas.getContext('2d');
-                        let backgroundUrl = profile[0].ImageUrl === 'X-URL' ? './wallpaper.jpg' : profile[0].ImageUrl
-                        const background = await Canvas.loadImage(backgroundUrl);
-                        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-
-                        ctx.strokeStyle = '#0933ad';
-                        ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
-                        ctx.font = applyText(canvas, profile[0].Name)
-                        ctx.fillStyle = '#433f4a';
-                        ctx.fillText(`Name: ${profile[0].Name}`, 250, 100);
-                        ctx.fillText(`Race: ${profile[0].Race}`, 250, 170);
-                        ctx.fillText(`$${profile[0].Gold}`, 360, 250);
-                        ctx.fillText(`Guild: ${profile[0].Guild}`, 50, 350);
-                        ctx.fillText(`Lvl: ${profile[0].Level}`, 50, 420);
-                        ctx.fillText(`Tag: ${profile[0].Tag}`, 50, 490);
-                        ctx.fillText(`Status: ${profile[0].Status}`, 50, 560);
-                        ctx.fillText(`ATK: ${profile[0].Attack}`, 300, 420)
-                        ctx.fillText(`DEF: ${profile[0].Defense}`, 550, 420);
-                        ctx.fillText(`GOD: ${profile[0].God}`, 50, 630);
-                        ctx.fillText(`Married: ${profile[0].IsMarried}`, 50, 700);
-                        if (profile[0].SteamID) {
-                            ctx.fillText(`Steam ID: ${profile[0].SteamID}`, 360, 630);
-                        }
+                ctx.font = applyText(canvas, profile[0].Name)
+                ctx.fillStyle = '#433f4a';
+                ctx.fillText(`Name: ${profile[0].Name}`, 250, 100);
+                ctx.fillText(`Race: ${profile[0].Race}`, 250, 170);
+                ctx.fillText(`$${profile[0].Gold}`, 360, 250);
+                ctx.fillText(`Guild: ${profile[0].Guild}`, 50, 350);
+                ctx.fillText(`Lvl: ${profile[0].Level}`, 50, 420);
+                ctx.fillText(`Tag: ${profile[0].Tag}`, 50, 490);
+                ctx.fillText(`Status: ${profile[0].Status}`, 50, 560);
+                ctx.fillText(`ATK: ${profile[0].Attack}`, 300, 420)
+                ctx.fillText(`DEF: ${profile[0].Defense}`, 550, 420);
+                ctx.fillText(`GOD: ${profile[0].God}`, 50, 630);
+                ctx.fillText(`Married: ${profile[0].IsMarried}`, 50, 700);
+                if (profile[0].SteamID) {
+                    ctx.fillText(`Steam ID: ${profile[0].SteamID}`, 360, 630);
+                }
 
 
 
-                        const goldBagUrl = 'https://cdn.imgbin.com/17/2/9/imgbin-money-bag-money-bag-gold-coin-lakshmi-gold-coin-4R7yB5ZRN4q58X9CNLG21yvHe.jpg'
-                        const goldBag = await Canvas.loadImage(goldBagUrl);
-                        ctx.drawImage(goldBag, 270, 200, 70, 70);
+                const goldBagUrl = 'https://cdn.imgbin.com/17/2/9/imgbin-money-bag-money-bag-gold-coin-lakshmi-gold-coin-4R7yB5ZRN4q58X9CNLG21yvHe.jpg'
+                const goldBag = await Canvas.loadImage(goldBagUrl);
+                ctx.drawImage(goldBag, 270, 200, 70, 70);
 
-                        // Pick up the pen
-                        ctx.beginPath();
-                        // Start the arc to form a circle
-                        ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
-                        // Put the pen down
-                        ctx.closePath();
-                        // Clip off the region you drew on
-                        ctx.clip();
+                // Pick up the pen
+                ctx.beginPath();
+                // Start the arc to form a circle
+                ctx.arc(125, 125, 100, 0, Math.PI * 2, true);
+                // Put the pen down
+                ctx.closePath();
+                // Clip off the region you drew on
+                ctx.clip();
 
-                        const avatar = await Canvas.loadImage(message.author.displayAvatarURL({ format: 'jpg' }));
-                        ctx.drawImage(avatar, 25, 25, 200, 200);
+                const avatar = await Canvas.loadImage(message.author.displayAvatarURL({ format: 'jpg' }));
+                ctx.drawImage(avatar, 25, 25, 200, 200);
 
 
 
 
-                        const attachment = new MessageAttachment(canvas.toBuffer(), 'profile-image.png');
+                const attachment = new MessageAttachment(canvas.toBuffer(), 'profile-image.png');
 
-                        message.channel.send(attachment);
-                    } catch (e) {
-                        console.log(e)
-                    }
-
-                }).catch(e => {
-                    console.log(e)
-                })
+                return message.channel.send(attachment);
             }
 
             if (command === 'edit') {
@@ -433,11 +421,11 @@ you can react on right to create your character or wrong to cancel`
                                 console.log(err);
                             }
                             else {
-                                message.channel.send(`tmro name **${oldName}** bata aba **${saved.Name}** vayo la moj gara`)
+                                return message.channel.send(`tmro name **${oldName}** bata aba **${saved.Name}** vayo la moj gara`)
                             }
                         })
                     } else {
-                        message.channel.send('xaina profile nai k ko edit hau')
+                        return message.channel.send('xaina profile nai k ko edit hau')
                     }
                 }).catch(e => console.log(e))
             }
@@ -458,15 +446,15 @@ you can react on right to create your character or wrong to cancel`
                                 if (err) {
                                     console.log(err)
                                 } else {
-                                    message.channel.send('image set gariyo aba ***bantaba profile*** garera check gara')
+                                    return message.channel.send('image set gariyo aba ***bantaba profile*** garera check gara')
                                 }
                             })
                         } else {
-                            message.channel.send('profile banau suruma')
+                            return message.channel.send('profile banau suruma')
                         }
                     }).catch(e => console.log(e))
                 } else {
-                    message.channel.send('image ko url valid xaina sathi thik url pathau hai natra hudeina')
+                    return message.channel.send('image ko url valid xaina sathi thik url pathau hai natra hudeina')
                 }
             }
             if (command === 'dota') {
@@ -487,7 +475,7 @@ you can react on right to create your character or wrong to cancel`
                             )
                             .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
 
-                        message.channel.send(dota2Profile)
+                        return message.channel.send(dota2Profile)
                     })
                     .catch(e => console.log(e))
 
@@ -588,10 +576,10 @@ you can react on right to create your character or wrong to cancel`
 
 
 
-                        message.channel.send(dota2stats)
+                        return message.channel.send(dota2stats)
                     }
                     else {
-                        message.channel.send("recent 10000 ota game ko matra stat vanxu ma")
+                        return message.channel.send("recent 10000 ota game ko matra stat vanxu ma")
                     }
                 }
                 if (args[0] === 'hero') {
@@ -692,7 +680,7 @@ you can react on right to create your character or wrong to cancel`
 
 
 
-                    message.channel.send(dota2stats)
+                    return message.channel.send(dota2stats)
 
                 }
                 if (args[0] === 'wl') {
@@ -711,7 +699,7 @@ you can react on right to create your character or wrong to cancel`
                         )
                         .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
 
-                    message.channel.send(wlstat);
+                    return message.channel.send(wlstat);
                 }
 
             }
@@ -734,14 +722,14 @@ you can react on right to create your character or wrong to cancel`
                     .setTimestamp()
                     .setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
 
-                message.channel.send(exampleEmbed)
+                return message.channel.send(exampleEmbed)
             }
             if (command === 'steam') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
                 const steamId = args.join(" ");
                 user.SteamID = steamId;
                 await user.save();
-                message.channel.send('Steam id set gariyo steam profile herne vaye use ***bantaba mmr***');
+                return message.channel.send('Steam id set gariyo steam profile herne vaye use ***bantaba mmr***');
             }
 
             if (command === 'mmr') {
@@ -764,7 +752,7 @@ you can react on right to create your character or wrong to cancel`
                     )
                     .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSECa11dQzB9SI5mmFy5ibqqOfxF3NGAXTIuQ&usqp=CAU')
 
-                message.channel.send(dota2Profile);
+                return message.channel.send(dota2Profile);
 
 
 
@@ -812,37 +800,37 @@ you can react on right to create your character or wrong to cancel`
 
                 const backpackItem1Url = getItemImage(playerInfo.backpack_0);
                 const backpackItem1 = await Canvas.loadImage(backpackItem1Url);
-                ctx.drawImage(backpackItem1,0,110,75,40);
+                ctx.drawImage(backpackItem1, 0, 110, 75, 40);
                 const backpackItem2Url = getItemImage(playerInfo.backpack_1);
                 const backpackItem2 = await Canvas.loadImage(backpackItem2Url);
-                ctx.drawImage(backpackItem2,75,110,75,40);
+                ctx.drawImage(backpackItem2, 75, 110, 75, 40);
                 const backpackItem3Url = getItemImage(playerInfo.backpack_2);
                 const backpackItem3 = await Canvas.loadImage(backpackItem3Url);
-                ctx.drawImage(backpackItem3,150,110,75,40);
+                ctx.drawImage(backpackItem3, 150, 110, 75, 40);
 
 
                 const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
 
-                message.channel.send(attachment);
+                return message.channel.send(attachment);
             }
 
             if (command === 'money') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
                 const gold = user.Gold;
 
-                message.channel.send(`You currently have **$${gold}**, <@${message.author.id}>`)
+                return message.channel.send(`You currently have **$${gold}**, <@${message.author.id}>`)
             }
             if (command === 'economy') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
                 const gold = user.Gold;
 
-                message.channel.send(`\`\`\`You currently have $${gold}\`\`\``)
+                return message.channel.send(`\`\`\`You currently have $${gold}\`\`\``)
             }
-            if( command === 'richest'){
-                const users = await ProfileModel.find({}).sort({Gold: -1});
-                let msg=''
-                users.forEach((user,index)=>{
-                    msg=msg+`${index+1}. \`${user.Name}\`, a character by \`${user.Tag}\` with **$${user.Gold}**
+            if (command === 'richest') {
+                const users = await ProfileModel.find({}).sort({ Gold: -1 });
+                let msg = ''
+                users.forEach((user, index) => {
+                    msg = msg + `${index + 1}. \`${user.Name}\`, a character by \`${user.Tag}\` with **$${user.Gold}**
                     `;
                 })
                 const richestPlayers = new MessageEmbed()
@@ -850,15 +838,85 @@ you can react on right to create your character or wrong to cancel`
                     .setTitle("The Richest Players of bantabaRPG")
                     .setDescription(`${msg}`)
 
-                message.channel.send(richestPlayers)
+                return message.channel.send(richestPlayers)
             }
-            
-            
+            if (command === 'xp') {
+                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const id = user.SteamID;
+                const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
+                let earnedXP = 0;
+                if (user.recentMatchID) {
+                    if (user.recentMatchID === data[0].match_id) {
+                        return message.channel.send('xp already added xa feri new game khela sathi ani add gara');
+                    }
+                    earnedXP = Number(data[0].duration);
+                    user.XP = user.XP + earnedXP;
+                    user.Gold = user.Gold + (earnedXP / 2);
+                    await user.save();
+                    const currentLevel = user.Level;
+                    const newLevel = levelUP(user.XP);
+                    let levelup = false;
+                    if (newLevel > currentLevel) {
+                        user.Level = newLevel;
+                        user.Gold = user.Gold + (newLevel * 2000);
+                        user.Attack = user.Attack + 1;
+                        user.Defense = user.Defense + 1;
+                        levelup = true;
+                    }
+                    user.recentMatchID=data[0].match_id;
+                    await user.save();
+                    const XPdetails = new MessageEmbed().setTitle('XP details')
+                        .setDescription(`Earned XP: ${earnedXP}
+                        You recieved **$${earnedXP / 2}** as a reward`);
+                    message.channel.send(XPdetails);
+                    if (levelup) {
+                        return message.channel.send(`:fireworks: Congratulation you leveled up to **${newLevel}**. You recieved **$${newLevel * 2000}** as a reward`)
+                    } else {
+                        return;
+                    }
 
+
+                } else {
+                    user.recentMatchID = data[0].match_id;
+                    earnedXP = Number(data[0].duration);
+                    user.XP = user.XP + earnedXP;
+                    user.Gold = user.Gold + (earnedXP / 2);
+                    const currentLevel = user.Level;
+                    const newLevel = levelUP(user.XP);
+                    let levelup = false;
+                    if (newLevel > currentLevel) {
+                        user.Level = newLevel;
+                        user.Gold = user.Gold + (newLevel * 2000);
+                        user.Attack = user.Attack + 1;
+                        user.Defense = user.Defense + 1;
+                        levelup = true;
+                    }
+                    await user.save();
+                    const XPdetails = new MessageEmbed().setTitle('XP details')
+                        .setDescription(`Earned XP: ${earnedXP}
+                        You recieved **$${earnedXP / 2}** as a reward`);
+                    message.channel.send(XPdetails);
+                    if (levelup) {
+                        return message.channel.send(`:fireworks: Congratulation you leveled up to **${newLevel}**. You recieved **$${newLevel * 2000}** as a reward`)
+                    } else {
+                        return;
+                    }
+
+                    //todo level up check
+                }
+
+            }
+
+
+            else {
+                const msg = message.content.split(' ');
+                msg.shift();
+                message.channel.send(`bantaba bot ko dictionary ma **${msg.join(" ")}** vanne sabda raina raixa`)
+            }
         }
 
     }
-    catch (e){
+    catch (e) {
         console.log(e);
     }
 
@@ -926,33 +984,74 @@ const applyText = (canvas, text) => {
 //     return itemImage;
 // }
 
-const getAllItemImages = ()=>{
+const getAllItemImages = () => {
     let images = [];
     const items = require('./dota_items_new');
-    items.forEach(item=>{
-        const obj={};
-        
-        let newItem=item.name.split('_');
+    items.forEach(item => {
+        const obj = {};
+
+        let newItem = item.name.split('_');
         newItem.shift();
         newItem = newItem.join("_");
-        
+
         obj.url = `http://cdn.dota2.com/apps/dota2/images/items/${newItem}_lg.png`;
         obj.id = item.id;
         images.push(obj);
-        
+
     })
     return images;
 }
 
-const getItemImage = (itemId) =>{
+const getItemImage = (itemId) => {
     let itemImage = 'https://upload.wikimedia.org/wikipedia/commons/6/6a/A_blank_flag.png';
     const dota_items = getAllItemImages();
-    dota_items.map(item=>{
-        if(item.id===itemId){
+    dota_items.map(item => {
+        if (item.id === itemId) {
             itemImage = item.url;
         }
     })
     return itemImage;
+}
+
+const levelUP = (earnedXP) => {
+    let level = 0;
+    if (earnedXP >= 4000 && earnedXP <= 10000) {
+        level = 2;
+    }
+    if (earnedXP > 10000 && earnedXP <= 20000) {
+        level = 3;
+    }
+    if (earnedXP > 20000 && earnedXP <= 50000) {
+        level = 4;
+    }
+    if (earnedXP > 50000 && earnedXP <= 100000) {
+        level = 5;
+    }
+    if (earnedXP > 100000 && earnedXP <= 180000) {
+        level = 6;
+    }
+    if (earnedXP > 180000 && earnedXP <= 260000) {
+        level = 7;
+    }
+    if (earnedXP > 260000 && earnedXP <= 350000) {
+        level = 8;
+    }
+    if (earnedXP > 350000 && earnedXP <= 450000) {
+        level = 9;
+    }
+    if (earnedXP > 450000 && earnedXP <= 570000) {
+        level = 10;
+    }
+    if (earnedXP > 570000 && earnedXP <= 600000) {
+        level = 11;
+    }
+    if (earnedXP > 600000 && earnedXP <= 800000) {
+        level = 12;
+    }
+    if (earnedXP > 800000 && earnedXP <= 1000000) {
+        level = 13;
+    }
+    return level;
 }
 
 
