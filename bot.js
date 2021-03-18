@@ -433,24 +433,15 @@ if (command === 'image') {
         return message.channel.send('image ko url ni deu sathi')
     }
     const url = args.join(" ");
-
+    const user = await ProfileModel.findOne({ Tag: message.author.tag });
     if (await isImageURL(url)) {
-        ProfileModel.findOne({
-            Tag: message.author.tag
-        }).then(profile => {
-            if (profile) {
-                profile.ImageUrl = url
-                profile.save((err, saved) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        return message.channel.send('image set gariyo aba ***bantaba profile*** garera check gara')
-                    }
-                })
-            } else {
-                return message.channel.send('profile banau suruma')
-            }
-        }).catch(e => console.log(e))
+        if (user) {
+            user.ImageUrl = url
+            await user.save();
+            return message.channel.send('image set gariyo aba ***bantaba profile*** garera check gara')
+        } else {
+            return message.channel.send('profile banau suruma')
+        }
     } else {
         return message.channel.send('image ko url valid xaina sathi thik url pathau hai natra hudeina')
     }
@@ -927,7 +918,7 @@ if (command === 'leaderboard') {
 if (command === 'formula') {
     const formula = new MessageEmbed()
         .setTitle('XP Formula')
-        .setDescription(`\`xp = (Game duration/7) x CurrentLevel+ ((kills+Assists)/deaths) x 100\`
+        .setDescription(`\`xp = (Game duration/5) x CurrentLevel+ ((kills+Assists)/deaths) x 80\`
 
                     Case **Win**:
                         For Ranked Games: \`xp = xp + 40% of xp\`
@@ -1073,7 +1064,7 @@ const getXP = (duration, kill, assists, deaths, level, stat) => {
             result = 'Win'
         }
     }
-    xp = (duration / 7) * level + ((kill + assists) / deaths) * 100;
+    xp = (duration / 5) * level + ((kill + assists) / deaths) * 80;
     if (result === 'Win' ) {
         if(stat.lobby_type===7){
             xp = xp + 0.4 * xp;
