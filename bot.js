@@ -849,16 +849,16 @@ you can react on right to create your character or wrong to cancel`
                     if (user.recentMatchID === data[0].match_id) {
                         return message.channel.send('xp already added xa feri new game khela sathi ani add gara');
                     }
-                    earnedXP = Number(data[0].duration);
+                    earnedXP = getXP(data[0].duration,data[0].kills,data[0].assists,data[0].deaths,user.Level);
                     user.XP = user.XP + earnedXP;
-                    user.Gold = user.Gold + (earnedXP / 2);
+                    user.Gold = user.Gold + Math.round(earnedXP / 2);
                     await user.save();
                     const currentLevel = user.Level;
                     const newLevel = levelUP(user.XP);
                     let levelup = false;
                     if (newLevel > currentLevel) {
                         user.Level = newLevel;
-                        user.Gold = user.Gold + (newLevel * 2000);
+                        user.Gold = user.Gold + Math.round(newLevel * 2000);
                         user.Attack = user.Attack + 1;
                         user.Defense = user.Defense + 1;
                         levelup = true;
@@ -867,7 +867,7 @@ you can react on right to create your character or wrong to cancel`
                     await user.save();
                     const XPdetails = new MessageEmbed().setTitle('XP details')
                         .setDescription(`Earned XP: ${earnedXP}
-                        You recieved **$${earnedXP / 2}** as a reward`);
+                        You recieved **$${Math.round(earnedXP / 2)}** as a reward`);
                     message.channel.send(XPdetails);
                     if (levelup) {
                         return message.channel.send(`:fireworks: Congratulation you leveled up to **${newLevel}**. You recieved **$${newLevel * 2000}** as a reward`)
@@ -877,36 +877,58 @@ you can react on right to create your character or wrong to cancel`
 
 
                 } else {
-                    user.recentMatchID = data[0].match_id;
-                    earnedXP = Number(data[0].duration);
+                   
+                    earnedXP = getXP(data[0].duration,data[0].kills,data[0].assists,data[0].deaths,user.Level);
                     user.XP = user.XP + earnedXP;
-                    user.Gold = user.Gold + (earnedXP / 2);
+                    user.Gold = user.Gold + Math.round(earnedXP / 2);
+                    await user.save();
                     const currentLevel = user.Level;
                     const newLevel = levelUP(user.XP);
                     let levelup = false;
                     if (newLevel > currentLevel) {
                         user.Level = newLevel;
-                        user.Gold = user.Gold + (newLevel * 2000);
+                        user.Gold = user.Gold + Math.round(newLevel * 2000);
                         user.Attack = user.Attack + 1;
                         user.Defense = user.Defense + 1;
                         levelup = true;
                     }
+                    user.recentMatchID=data[0].match_id;
                     await user.save();
                     const XPdetails = new MessageEmbed().setTitle('XP details')
                         .setDescription(`Earned XP: ${earnedXP}
-                        You recieved **$${earnedXP / 2}** as a reward`);
+                        You recieved **$${Math.round(earnedXP / 2)}** as a reward`);
                     message.channel.send(XPdetails);
                     if (levelup) {
                         return message.channel.send(`:fireworks: Congratulation you leveled up to **${newLevel}**. You recieved **$${newLevel * 2000}** as a reward`)
                     } else {
                         return;
                     }
-
                     //todo level up check
                 }
 
             }
 
+            if(command === 'leaderboard'){
+                const users = await ProfileModel.find({}).sort({ XP: -1 });
+                let msg = ''
+                users.forEach((user, index) => {
+                    msg = msg + `${index + 1}. \`${user.Name}\`, a character by \`${user.Tag}\` with total XP: **${user.XP}**, Level: **${user.Level}**
+                    `;
+                })
+                const richestPlayers = new MessageEmbed()
+                    .setColor("#11096e")
+                    .setTitle("Top Dota2 players of BantabaRPG")
+                    .setDescription(`${msg}`)
+
+                return message.channel.send(richestPlayers)
+            }
+
+            if(command==='formula'){
+                const formula = new MessageEmbed()
+                    .setTitle('XP Formula')
+                    .setDescription(`xp = (Game duration / 7) x CurrentLevel+ ((kills + Assists) / deaths) x 100`)
+                return message.channel.send(formula)
+            }
 
             else {
                 const msg = message.content.split(' ');
@@ -983,6 +1005,12 @@ const applyText = (canvas, text) => {
 //     })
 //     return itemImage;
 // }
+
+const getXP = (duration,kill,assists,deaths,level)=>{    
+    let xp = 0;
+    xp = (duration/7)*level+ ((kill+assists)/deaths)*100;
+    return Math.trunc(xp);
+}
 
 const getAllItemImages = () => {
     let images = [];
