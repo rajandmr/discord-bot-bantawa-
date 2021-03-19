@@ -832,7 +832,7 @@ you can react on right to create your character or wrong to cancel`
 
                 return message.channel.send(richestPlayers)
             }
-            if (command === 'demoaddxp') {
+            if (command === 'addxp') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
                 const id = user.SteamID;
                 const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
