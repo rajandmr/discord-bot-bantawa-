@@ -901,6 +901,7 @@ you can react on right to create your character or wrong to cancel`
                     let goldReward = Math.round(xp/2);
                     goldbooster? goldReward = goldReward+Math.round(earnedXP/2) : null
                     user.Gold = user.Gold + goldReward
+                    goldbooster? user.activeGoblin = 0: null
                 
                     const currentLevel = user.Level;
                     const newLevel = levelUP(user.XP).level;
@@ -991,7 +992,7 @@ you can react on right to create your character or wrong to cancel`
                     let goldReward = Math.round(xp/2);
                     goldbooster? goldReward = goldReward+Math.round(earnedXP/2) : null
                     user.Gold = user.Gold + goldReward
-                
+                    goldbooster? user.activeGoblin = 0: null
                     const currentLevel = user.Level;
                     const newLevel = levelUP(user.XP).level;
                     let levelup = false;
