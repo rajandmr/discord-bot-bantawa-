@@ -57,7 +57,13 @@ const ProfileSchema = new Mongoose.Schema({
     SteamID: String,
     MatchID: String,
     HeroID: Number,
-    recentMatchID: Number
+    recentMatchID: Number,
+    charm: Number,
+    goblinFortune: Number,
+    blackMole: Number,
+    activeCharm: Number,
+    activeGoblin: Number
+
 },
 {
     timestamps: true
