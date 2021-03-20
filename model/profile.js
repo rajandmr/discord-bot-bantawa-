@@ -62,7 +62,9 @@ const ProfileSchema = new Mongoose.Schema({
     goblinFortune: Number,
     blackMole: Number,
     activeCharm: Number,
-    activeGoblin: Number
+    activeGoblin: Number,
+    kdaReducer: Number,
+    activeKDA: Number
 
 },
 {

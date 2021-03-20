@@ -841,9 +841,17 @@ you can react on right to create your character or wrong to cancel`
                     if (user.recentMatchID === data[0].match_id) {
                         return message.channel.send('xp already added xa feri new game khela sathi ani add gara');
                     }
-                    earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, data[0].deaths, user.Level, data[0]);
+                    let deaths = data[0].deaths;
+                    let kdaBoooster = false;
+                    user.activeKDA ? user.activeKDA === 1 ? deaths = 4 : null : null
+                    user.activeKDA ? user.activeKDA === 1 ? kdaBoooster = true : null : null
+                    user.activeKDA = 0;
+                    earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, deaths, user.Level, data[0]);
                     let xp = earnedXP;
+                    let partyBonus = 0;
                     const stat = data[0];
+                    stat.party_size > 1 ? partyBonus = Math.round(0.04 * earnedXP) : null;
+
                     const player_slot = stat.player_slot;
                     const radiant_win = stat.radiant_win;
                     let result = '';
@@ -897,12 +905,12 @@ you can react on right to create your character or wrong to cancel`
                     booster === 20 ? user.activeCharm = 0 : null;
                     modifiedXP = Math.round(modifiedXP);
                     xp = Math.round(xp);
-                    user.XP = user.XP + xp;
-                    let goldReward = Math.round(xp/2);
-                    goldbooster? goldReward = goldReward+Math.round(earnedXP/2) : null
+                    user.XP = user.XP + xp + partyBonus;
+                    let goldReward = Math.round(xp / 2);
+                    goldbooster ? goldReward = goldReward + Math.round(earnedXP / 2) : null
                     user.Gold = user.Gold + goldReward
-                    goldbooster? user.activeGoblin = 0: null
-                
+                    goldbooster ? user.activeGoblin = 0 : null
+
                     const currentLevel = user.Level;
                     const newLevel = levelUP(user.XP).level;
                     let levelup = false;
@@ -916,12 +924,14 @@ you can react on right to create your character or wrong to cancel`
                     user.recentMatchID = data[0].match_id;
                     await user.save();
                     const XPdetails = new MessageEmbed().setTitle('XP details')
-                        .setDescription(`${booster === 20 ? '**XP Charm Consumed**' : ''}
-                        ${goldbooster ? '**Goblin Fortune Consumed**' : ''}
-                        Earned XP: ${earnedXP}
-                        ${result === 'Win' ? `Win Bonus (+${modifiedpercent}%)` : `Lose Penalty (-${modifiedpercent})%`} : ${modifiedXP}
-                        Total XP Rewarded: ${xp}
-                        You recieved **$${goldReward}** as a reward`);
+                        .setDescription(`${kdaBoooster ? '**KDA Reducer Consumed**' : ''}
+                    ${booster === 20 ? '**XP Charm Consumed**' : ''}
+                ${goldbooster ? '**Goblin Fortune Consumed**' : ''}
+                Earned XP: ${earnedXP}
+                ${result === 'Win' ? `Win Bonus (+${modifiedpercent}%)` : `Lose Penalty (-${modifiedpercent})%`} : ${modifiedXP}
+                ${stat.party_size > 1 ? `Party Queue Bonus(+4%): ${partyBonus}` : 'Solo Queue Bonus: 0'}
+                Total XP Rewarded: ${xp}
+                You recieved **$${goldReward}** as a reward`);
                     message.channel.send(XPdetails);
                     if (levelup) {
                         return message.channel.send(`:fireworks: Congratulation you leveled up to **${newLevel}**. You recieved **$${newLevel * 2000}** as a reward`)
@@ -932,9 +942,16 @@ you can react on right to create your character or wrong to cancel`
 
                 } else {
 
-                    earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, data[0].deaths, user.Level, data[0]);
+                    let deaths = data[0].deaths;
+                    let kdaBoooster = false;
+                    user.activeKDA ? user.activeKDA === 1 ? deaths = 4 : null : null
+                    user.activeKDA ? user.activeKDA === 1 ? kdaBoooster = true : null : null
+                    user.activeKDA = 0;
+                    earnedXP = getXP(data[0].duration, data[0].kills, data[0].assists, deaths, user.Level, data[0]);
                     let xp = earnedXP;
+                    let partyBonus = 0;
                     const stat = data[0];
+                    stat.party_size > 1 ? partyBonus = Math.round(0.04 * earnedXP) : null;
                     const player_slot = stat.player_slot;
                     const radiant_win = stat.radiant_win;
                     let result = '';
@@ -988,11 +1005,11 @@ you can react on right to create your character or wrong to cancel`
                     booster === 20 ? user.activeCharm = 0 : null;
                     modifiedXP = Math.round(modifiedXP);
                     xp = Math.round(xp);
-                    user.XP = user.XP + xp;
-                    let goldReward = Math.round(xp/2);
-                    goldbooster? goldReward = goldReward+Math.round(earnedXP/2) : null
+                    user.XP = user.XP + xp + partyBonus;
+                    let goldReward = Math.round(xp / 2);
+                    goldbooster ? goldReward = goldReward + Math.round(earnedXP / 2) : null
                     user.Gold = user.Gold + goldReward
-                    goldbooster? user.activeGoblin = 0: null
+                    goldbooster ? user.activeGoblin = 0 : null
                     const currentLevel = user.Level;
                     const newLevel = levelUP(user.XP).level;
                     let levelup = false;
@@ -1006,10 +1023,12 @@ you can react on right to create your character or wrong to cancel`
                     user.recentMatchID = data[0].match_id;
                     await user.save();
                     const XPdetails = new MessageEmbed().setTitle('XP details')
-                        .setDescription(`${booster === 20 ? '**XP Charm Consumed**' : ''}
+                        .setDescription(`${kdaBoooster ? '**KDA Reducer Consumed**' : ''}
+                        ${booster === 20 ? '**XP Charm Consumed**' : ''}
                     ${goldbooster ? '**Goblin Fortune Consumed**' : ''}
                     Earned XP: ${earnedXP}
                     ${result === 'Win' ? `Win Bonus (+${modifiedpercent}%)` : `Lose Penalty (-${modifiedpercent})%`} : ${modifiedXP}
+                    ${stat.party_size > 1 ? `Party Queue Bonus(+4%): ${partyBonus}` : 'Solo Queue Bonus: 0'}
                     Total XP Rewarded: ${xp}
                     You recieved **$${goldReward}** as a reward`);
                     message.channel.send(XPdetails);
@@ -1072,7 +1091,10 @@ you can react on right to create your character or wrong to cancel`
                      **2. Goblin Fortune** : **$600**
                      Get double the gold as reward. 1 fortune for 1 game
                      **3. Black Mole** : **$800**
-                     Drops either xp charm(33.33%) or gobline fortune(66.66%)`,
+                     Drops either xp charm(33.33%) or gobline fortune(66.66%)
+                     **4. KDA Reducer** : **$1200**
+                     Sets you death to 4 improving your KDA`
+
                     );
                 return message.channel.send(msg);
             }
@@ -1123,8 +1145,23 @@ you can react on right to create your character or wrong to cancel`
                     } else {
                         return message.channel.send('You are too poor to buy this.')
                     }
-                } else {
-                    return message.channel.send('Sorry, boosters available are only 1,2 or 3')
+                }
+                if (msg === '4') {
+                    if (user.Gold >= 1200) {
+                        if (user.kdaReducer) {
+                            user.kdaReducer = user.kdaReducer + 1;
+                        } else {
+                            user.kdaReducer = 1
+                        }
+                        user.Gold = user.Gold - 1200;
+                        await user.save();
+                        return message.channel.send('You have succesfully purchased. Check using ***~boosters*** or activate using ***~activate 4***')
+                    } else {
+                        return message.channel.send('You are too poor to buy this.')
+                    }
+                }
+                else {
+                    return message.channel.send('Sorry, item numbers available are only 1,2,3 and 4')
                 }
             }
 
@@ -1136,14 +1173,17 @@ you can react on right to create your character or wrong to cancel`
                 let charmCount = 0;
                 let blackMoleCount = 0;
                 let goblinFortuneCount = 0;
+                let kdaReducerCount = 0;
                 user.charm ? charmCount = user.charm : charmCount = 0;
                 user.blackMole ? blackMoleCount = user.blackMole : blackMoleCount = 0;
                 user.goblinFortune ? goblinFortuneCount = user.goblinFortune : goblinFortuneCount = 0;
+                user.kdaReducer ? kdaReducerCount = user.kdaReducer : kdaReducerCount = 0;
                 const msg = new MessageEmbed()
                     .setTitle('Your Boosters')
                     .setDescription(`**1.XP Charm ** : \`${charmCount}\`
                     **2.Goblin Fortune ** : \`${goblinFortuneCount}\`
                     **3.Black Mole ** : \`${blackMoleCount}\`
+                    **4.KDA Reducer ** : \`${kdaReducerCount}\`
 
                     Activate using \`~activate [itemNumber]\``)
                 return message.channel.send(msg);
@@ -1210,12 +1250,73 @@ you can react on right to create your character or wrong to cancel`
                     }
                     await user.save();
                     return message.channel.send('You recieved **Goblin Fortune**. Check using ***~boosters*** or activate using ***~activate 2***')
-                } else {
+                }
+                if (msg === '4') {
+                    if (user.kdaReducer < 1) {
+                        return message.channel.send('You dont have this type of booster. You need to buy it')
+                    }
+                    if (!user.activeKDA) {
+                        user.activeKDA = 1
+                        user.kdaReducer = user.kdaReducer - 1;
+                        await user.save();
+                        return message.channel.send('Succesfully Activated. This will be automatically used on your next ***~addxp*** command')
+                    }
+                    if (user.activeKDA === 1) {
+                        return message.channel.send('You have already activated XP charm. You can activate another after it is consumed.')
+                    }
+                    user.activeKDA = user.activeKDA + 1;
+                    user.kdaReducer = user.kdaReducer - 1
+                    await user.save();
+                    return message.channel.send('Succesfully Activated. This will be automatically used on your next ***~addxp*** command')
+                }
+                else {
                     return message.channel.send('Sorry, boosters available are only 1,2 or 3')
                 }
             }
+            if (command === 'give') {
+                const money = +args[0];
+                if (isNaN(money)) {
+                    return message.channel.send('You used malformed arguement')
+                }
+                if (args[1].includes('@')) {
+                    const user2Id = args[1].replace(/[^\w\s]/gi, '');
+                    const user1 = await ProfileModel.findOne({ Tag: message.author.tag });
+                    const user2 = await ProfileModel.findOne({ UserId: user2Id });
+                    if(!user1){
+                        return message.channel.send('Yo do not have a character.')
+                    }
+                    if (!user2) {
+                        return message.channel.send('This user does not have a character.')
+                    }
 
+                    if (user1.Gold < money) {
+                        return message.channel.send('You are too poor.')
+                    }
+                    user1.Gold = user1.Gold - money;
+                    user2.Gold = user2.Gold + money;
+                    await user1.save();
+                    await user2.save();
+                    return message.channel.send(`<@${user2.UserId}> now has **$${user2.Gold}**, you now have **$${user1.Gold}**`)
+                }
+                const user2Name = args[1]
+                const user1 = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user2 = await ProfileModel.findOne({ Name: user2Name });
+                if(!user1){
+                    return message.channel.send('Yo do not have a character.')
+                }
+                if (!user2) {
+                    return message.channel.send('This user does not have a character.')
+                }
+                if (user1.Gold < money) {
+                    return message.channel.send('You are too poor.')
+                }
+                user1.Gold = user1.Gold - money;
 
+                user2.Gold = user2.Gold + money;
+                await user1.save();
+                await user2.save();
+                return message.channel.send(`<@${user2.UserId}> now has **$${user2.Gold}**, you now have **$${user1.Gold}**`)
+            }
             if (command === 'help') {
                 const msg = new MessageEmbed()
                     .setColor('#7ef2ea')
