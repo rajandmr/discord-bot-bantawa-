@@ -1282,7 +1282,7 @@ you can react on right to create your character or wrong to cancel`
                     const user2Id = args[1].replace(/[^\w\s]/gi, '');
                     const user1 = await ProfileModel.findOne({ Tag: message.author.tag });
                     const user2 = await ProfileModel.findOne({ UserId: user2Id });
-                    if(!user1){
+                    if (!user1) {
                         return message.channel.send('Yo do not have a character.')
                     }
                     if (!user2) {
@@ -1301,7 +1301,7 @@ you can react on right to create your character or wrong to cancel`
                 const user2Name = args[1]
                 const user1 = await ProfileModel.findOne({ Tag: message.author.tag });
                 const user2 = await ProfileModel.findOne({ Name: user2Name });
-                if(!user1){
+                if (!user1) {
                     return message.channel.send('Yo do not have a character.')
                 }
                 if (!user2) {
@@ -1350,6 +1350,35 @@ you can react on right to create your character or wrong to cancel`
 
                 return message.channel.send(msg);
             }
+
+            if (command === 'joke') {
+                const {data} = await Axios.get(`https://jokeapi-v2.p.rapidapi.com/joke/Any`,
+                    {
+                        headers: {
+                            "x-rapidapi-key": process.env.RAPID_API_KEY,
+                            "x-rapidapi-host": "jokeapi-v2.p.rapidapi.com",
+                            "useQueryString": true
+                        },
+                        query: {
+                            "contains": "C%23",
+                            "format": "json",
+                            "blacklistFlags": "nsfw,racist",
+                            "idRange": "0-150",
+                            "type": "single,twopart"
+                        }
+                    }
+                )
+                const msg = new MessageEmbed()
+                    .setTitle('Joke')
+                    .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrEDgCe9YM41aW-0pEPvXMLoaOb3tGullyEg&usqp=CAU')
+                    .setDescription( `Category: **${data.category}**
+                    Type: **${data.type}**
+                        ${data.type==='single'?data.joke:`${data.setup} `}
+                        ${data.type==='single'?'':`**${data.delivery}** `}`)
+                    console.log(data);
+                    return message.channel.send(msg);
+                }
+
             else {
                 const msg = args.join(" ");
                 message.channel.send(`bantaba bot ko dictionary ma **${command} ${msg}** vanne sabda raina raixa`)
