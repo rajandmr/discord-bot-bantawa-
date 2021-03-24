@@ -1,6 +1,7 @@
 require('dotenv').config();
 require('./db');
 const moment = require('moment')
+const cheerio = require('cheerio');
 
 const ProfileModel = require('./model/profile')
 
@@ -1352,7 +1353,15 @@ you can react on right to create your character or wrong to cancel`
             }
 
             if (command === 'joke') {
-                const {data} = await Axios.get(`https://jokeapi-v2.p.rapidapi.com/joke/Any`,
+                let msg = args.join(" ");
+                if (!args.length) {
+                    msg = 'any'
+                }
+                if (args.length >= 2) {
+                    return message.channel.send('You used malformed arguement')
+                }
+
+                const { data } = await Axios.get(`https://jokeapi-v2.p.rapidapi.com/joke/${msg}`,
                     {
                         headers: {
                             "x-rapidapi-key": process.env.RAPID_API_KEY,
@@ -1360,24 +1369,29 @@ you can react on right to create your character or wrong to cancel`
                             "useQueryString": true
                         },
                         query: {
-                            "contains": "C%23",
                             "format": "json",
-                            "blacklistFlags": "nsfw,racist",
-                            "idRange": "0-150",
-                            "type": "single,twopart"
+
                         }
                     }
                 )
-                const msg = new MessageEmbed()
+                if(!data){
+                    return message.channel.send(new MessageEmbed()
                     .setTitle('Joke')
                     .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrEDgCe9YM41aW-0pEPvXMLoaOb3tGullyEg&usqp=CAU')
-                    .setDescription( `Category: **${data.category}**
-                    Type: **${data.type}**
-                        ${data.type==='single'?data.joke:`${data.setup} `}
-                        ${data.type==='single'?'':`**${data.delivery}** `}`)
-                    console.log(data);
-                    return message.channel.send(msg);
+                    .setDescription(`Sorry no joke of this category is found
+                    Here are some categories you can use 
+                    **Any** **Dark** **Christmas** **Programming** **Pun** and many more`))
                 }
+                const info = new MessageEmbed()
+                    .setTitle('Joke')
+                    .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrEDgCe9YM41aW-0pEPvXMLoaOb3tGullyEg&usqp=CAU')
+                    .setDescription(`Category: **${data.category}**
+               Type: **${data.type}**
+                   ${data.type === 'single' ? data.joke : `${data.setup} `}
+                   ${data.type === 'single' ? '' : `**${data.delivery}** `}`)
+               
+                return message.channel.send(info);
+            }
 
             else {
                 const msg = args.join(" ");
@@ -1397,7 +1411,6 @@ you can react on right to create your character or wrong to cancel`
 
 
 })
-
 
 
 
