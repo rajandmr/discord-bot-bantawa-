@@ -1374,9 +1374,9 @@ you can react on right to create your character or wrong to cancel`
                         }
                     }
                 )
-                if(!data){
+                if(data.type=== undefined){
                     return message.channel.send(new MessageEmbed()
-                    .setTitle('Joke')
+                    .setTitle('Error')
                     .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrEDgCe9YM41aW-0pEPvXMLoaOb3tGullyEg&usqp=CAU')
                     .setDescription(`Sorry no joke of this category is found
                     Here are some categories you can use 
