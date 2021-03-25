@@ -31,6 +31,7 @@ client.on('ready', () => {
 
 const ytdl = require('ytdl-core');
 const ytSearch = require('yt-search');
+const { default: axios } = require('axios');
 
 
 const prefix = 'bantaba'
@@ -1391,6 +1392,51 @@ you can react on right to create your character or wrong to cancel`
                    ${data.type === 'single' ? '' : `**${data.delivery}** `}`)
                
                 return message.channel.send(info);
+            }
+
+            if( command === 'movie'){
+            
+                if(!args.length || args[0].toLowerCase()==='discover'){
+                    let randomNumber = Math.floor(Math.random()*500)
+                    randomNumber===0?randomNumber=1:null;
+                    const {data } = await axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${process.env.MOVIE_API_KEY}&page=${randomNumber}`,{
+                    })
+
+                    let genreName = [];
+                    const movie = data.results[Math.floor(Math.random()*20)];
+                    const imageUrl = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2/${movie.poster_path}`
+
+                    const genreArray = require('./genre');
+                    movie.genre_ids.forEach((id)=>{
+                        genreArray.forEach((genre)=>{
+                            if(id===genre.id){
+                                genreName.push(genre.name)
+                            }
+                        })
+                    })
+                    
+
+                    const info = new MessageEmbed()
+                        .setTitle(movie.title)
+                        .setDescription(`Overview:
+                        ${movie.overview}`)
+                        .setImage(imageUrl)
+                        .addFields(
+                            {name: 'Vote',value:movie.vote_count,inline:true},
+                            {name: 'Average Rating',value:movie.vote_average,inline:true},
+                            {name: 'Popularity',value:movie.popularity,inline:true}
+                        )
+                        .addField('Genre',genreName.join(", "),true)
+                        .addField('18+',movie.adult?'Yes':'No',true)
+                        .setFooter(`Release Date: ${movie.release_date}`)
+
+                   
+                    return message.channel.send(info);
+                }
+
+                return message.channel.send( new MessageEmbed().setDescription(`Oops Wrong Argument. Here are the list of arguments you can use:
+                1. **Discover** recommends a random movie from more than 10000 movies
+                2. **Trening movies feature and Genre based search Coming Soon**`))
             }
 
             else {
