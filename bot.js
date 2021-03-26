@@ -1375,11 +1375,11 @@ you can react on right to create your character or wrong to cancel`
                         }
                     }
                 )
-                if(data.type=== undefined){
+                if (data.type === undefined) {
                     return message.channel.send(new MessageEmbed()
-                    .setTitle('Error')
-                    .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrEDgCe9YM41aW-0pEPvXMLoaOb3tGullyEg&usqp=CAU')
-                    .setDescription(`Sorry no joke of this category is found
+                        .setTitle('Error')
+                        .setThumbnail('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrEDgCe9YM41aW-0pEPvXMLoaOb3tGullyEg&usqp=CAU')
+                        .setDescription(`Sorry no joke of this category is found
                     Here are some categories you can use 
                     **Any** **Dark** **Christmas** **Programming** **Pun** and many more`))
                 }
@@ -1390,54 +1390,146 @@ you can react on right to create your character or wrong to cancel`
                Type: **${data.type}**
                    ${data.type === 'single' ? data.joke : `${data.setup} `}
                    ${data.type === 'single' ? '' : `**${data.delivery}** `}`)
-               
+
                 return message.channel.send(info);
             }
 
-            if( command === 'movie'){
-            
-                if(!args.length || args[0].toLowerCase()==='discover'){
-                    let randomNumber = Math.floor(Math.random()*500)
-                    randomNumber===0?randomNumber=1:null;
-                    const {data } = await axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${process.env.MOVIE_API_KEY}&page=${randomNumber}`,{
+            if (command === 'movie') {
+                if (!args.length) {
+                    return message.channel.send(new MessageEmbed().setDescription(`Oops Wrong Argument.
+                    Use \`~movie help\` to see how to use commands
+                   `))
+                }
+                if (args[0].toLowerCase() === 'discover') {
+                    let randomNumber = Math.floor(Math.random() * 500)
+                    randomNumber === 0 ? randomNumber = 1 : null;
+                    const { data } = await axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${process.env.MOVIE_API_KEY}&page=${randomNumber}`, {
                     })
 
                     let genreName = [];
-                    const movie = data.results[Math.floor(Math.random()*20)];
+                    const movie = data.results[Math.floor(Math.random() * 20)];
                     const imageUrl = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2/${movie.poster_path}`
 
                     const genreArray = require('./genre');
-                    movie.genre_ids.forEach((id)=>{
-                        genreArray.forEach((genre)=>{
-                            if(id===genre.id){
+                    movie.genre_ids.forEach((id) => {
+                        genreArray.forEach((genre) => {
+                            if (id === genre.id) {
                                 genreName.push(genre.name)
                             }
                         })
                     })
-                    
+
 
                     const info = new MessageEmbed()
-                        .setTitle(movie.title)
+                        .setTitle(movie.original_title ? movie.original_title : movie.original_name)
+                        .setDescription(`Overview:
+                    ${movie.overview}`)
+                        .setImage(imageUrl)
+                        .addFields(
+                            { name: 'Vote', value: `${movie.vote_count}`, inline: true },
+                            { name: 'Average Rating', value: `${movie.vote_average}`, inline: true },
+                            { name: 'Popularity', value: `${movie.popularity}`, inline: true }
+                        )
+                        .addField('Genre', `${genreName.join(", ") ? genreName.join(", ") : 'Not Given'}`, true)
+                        .addField('18+', movie.adult ? 'Yes' : 'No', true)
+                        .setFooter(`Release Date: ${movie.release_date ? movie.release_date : movie.first_air_date}`)
+
+
+                    return message.channel.send(info);
+                }
+
+
+                if (args[0].toLowerCase() === 'trending') {
+                    let time = args[1] ? args[1].toLowerCase() : 'day';
+
+                    if (time !== 'day' && time !== 'week') {
+                        return message.channel.send('Required parameter is either **day** or **week**')
+                    }
+                    const { data } = await Axios.get(`https://api.themoviedb.org/3/trending/all/${time}?api_key=${process.env.MOVIE_API_KEY}`)
+                    const randomNumber = Math.floor(Math.random() * 20);
+                    const movie = data.results[args[2] <= 20 ? +args[2] - 1 : randomNumber];
+
+                    let genreName = [];
+                    const genreArray = require('./genre');
+                    movie.genre_ids.forEach((id) => {
+                        genreArray.forEach((genre) => {
+                            if (id === genre.id) {
+                                genreName.push(genre.name)
+                            }
+                        })
+                    })
+                    const imageUrl = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2/${movie.poster_path}`;
+
+
+                    const info = new MessageEmbed()
+                        .setTitle(movie.original_title ? movie.original_title : movie.original_name)
                         .setDescription(`Overview:
                         ${movie.overview}`)
                         .setImage(imageUrl)
                         .addFields(
-                            {name: 'Vote',value:movie.vote_count,inline:true},
-                            {name: 'Average Rating',value:movie.vote_average,inline:true},
-                            {name: 'Popularity',value:movie.popularity,inline:true}
+                            { name: 'Vote', value: `${movie.vote_count}`, inline: true },
+                            { name: 'Average Rating', value: `${movie.vote_average}`, inline: true },
+                            { name: 'Popularity', value: `${movie.popularity}`, inline: true }
                         )
-                        .addField('Genre',genreName.join(", "),true)
-                        .addField('18+',movie.adult?'Yes':'No',true)
-                        .setFooter(`Release Date: ${movie.release_date}`)
+                        .addField('Genre', `${genreName.join(", ") ? genreName.join(", ") : 'Not Given'}`, true)
+                        .addField('18+', movie.adult ? 'Yes' : 'No', true)
+                        .setFooter(`Release Date: ${movie.release_date ? movie.release_date : movie.first_air_date}`)
+
+
+                    return message.channel.send(info);
+
+                }
+                if (args[0].toLowerCase() === 'popular') {
+                    
 
                    
+                    const { data } = await Axios.get(`http://api.themoviedb.org/3/movie/popular?api_key=${process.env.MOVIE_API_KEY}`)
+                    const randomNumber = Math.floor(Math.random() * 20);
+                    const movie = data.results[args[1] <= 20 ? +args[1] - 1 : randomNumber];
+                    let genreName = [];
+                    const genreArray = require('./genre');
+                    movie.genre_ids.forEach((id) => {
+                        genreArray.forEach((genre) => {
+                            if (id === genre.id) {
+                                genreName.push(genre.name)
+                            }
+                        })
+                    })
+                    const imageUrl = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2/${movie.poster_path}`;
+
+
+                    const info = new MessageEmbed()
+                        .setTitle(movie.original_title ? movie.original_title : movie.original_name)
+                        .setDescription(`Overview:
+                        ${movie.overview}`)
+                        .setImage(imageUrl)
+                        .addFields(
+                            { name: 'Vote', value: `${movie.vote_count}`, inline: true },
+                            { name: 'Average Rating', value: `${movie.vote_average}`, inline: true },
+                            { name: 'Popularity', value: `${movie.popularity}`, inline: true }
+                        )
+                        .addField('Genre', `${genreName.join(", ") ? genreName.join(", ") : 'Not Given'}`, true)
+                        .addField('18+', movie.adult ? 'Yes' : 'No', true)
+                        .setFooter(`Release Date: ${movie.release_date ? movie.release_date : movie.first_air_date}`)
+
+
                     return message.channel.send(info);
+
+                }
+                if (args[0].toLowerCase() === 'help') {
+
+                    return message.channel.send(new MessageEmbed().setDescription(`List of all movie commands.
+                    1. \`~movie discover\` recommends a random movie from a database of more than 10000 movies updated daily
+                    2. \`~movie trending [day/week]\` recommends a random movie from top 20 trending movies of **day/week**
+                    3. \`~movie popular\` recommends a random movie from top 20 popular movies*
+                   `))
                 }
 
-                return message.channel.send( new MessageEmbed().setDescription(`Oops Wrong Argument. Here are the list of arguments you can use:
-                1. **Discover** recommends a random movie from more than 10000 movies
-                2. **Trening movies feature and Genre based search Coming Soon**`))
+                return message.channel.send(new MessageEmbed().setDescription(`Oops Wrong Argument.
+                Use \`~movie help\` to see how to use commands
+               `))
             }
+
 
             else {
                 const msg = args.join(" ");
