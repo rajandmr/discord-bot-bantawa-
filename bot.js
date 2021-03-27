@@ -324,6 +324,7 @@ you can react on right to create your character or wrong to cancel`
                         })
                     })
 
+                    return;
                 }
 
 
@@ -1516,12 +1517,70 @@ you can react on right to create your character or wrong to cancel`
                     return message.channel.send(info);
 
                 }
+                if (args[0].toLowerCase() === 'search') {
+                    
+
+                    args.shift();
+                    const query = args.join(" ") ;
+                    const { data } = await Axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1&query=${query}`)
+                    
+                    const movies = data.results;
+                    let content = '';
+                    if(!movies){
+                        return message.channel.send(`Sorry didn't found any matching result.`)
+                    }
+                    movies.forEach((movie,index)=>{
+                        content= content + `${index+1}. Name : **${movie.original_title ? movie.original_title :  movie.original_name}**,  ID: \`${movie.id}\`
+                        `
+                    })
+                    const info = new MessageEmbed()
+                        .setTitle('Results')
+                        .setDescription(`${content}
+                            
+                        use \`~movie details [id]\` to get details of one of the movie you searched`)
+
+
+                    return message.channel.send(info);
+
+                }
+                if (args[0].toLowerCase() === 'details') {
+                    
+
+                   
+                    const { data } = await Axios.get(`http://api.themoviedb.org/3/movie/${args[1]}?api_key=${process.env.MOVIE_API_KEY}`)
+                    const movie = data;
+
+                   
+                    const imageUrl = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2/${movie.poster_path}`;
+
+
+                    const info = new MessageEmbed()
+                        .setAuthor(movie.original_title ? movie.original_title : movie.original_name,'',movie.homepage)
+                        .setDescription(`Overview:
+                        ${movie.overview}`)
+                        .setImage(imageUrl)
+                        .addFields(
+                            { name: 'Vote', value: `${movie.vote_count}`, inline: true },
+                            { name: 'Average Rating', value: `${movie.vote_average}`, inline: true },
+                            { name: 'Popularity', value: `${movie.popularity}`, inline: true }
+                        )
+                        .addField('18+', movie.adult ? 'Yes' : 'No', true)
+                        .setFooter(`Release Date: ${movie.release_date ? movie.release_date : movie.first_air_date}`)
+
+
+                    return message.channel.send(info);
+
+                }
                 if (args[0].toLowerCase() === 'help') {
 
                     return message.channel.send(new MessageEmbed().setDescription(`List of all movie commands.
                     1. \`~movie discover\` recommends a random movie from a database of more than 10000 movies updated daily
                     2. \`~movie trending [day/week]\` recommends a random movie from top 20 trending movies of **day/week**
-                    3. \`~movie popular\` recommends a random movie from top 20 popular movies*
+                    3. \`~movie popular\` recommends a random movie from top 20 popular movies
+                    4. \`~movie search [name]\` gives a list of movies that matched your search query*
+                    5. \`~movie details [id]\` gives details of that particular movie*
+                    6. \`~tv search [name]\` gives a list of tv shows that matched your search query*
+                    7. \`~tv details [id]\` gives details of that particular movie*
                    `))
                 }
 
@@ -1530,7 +1589,72 @@ you can react on right to create your character or wrong to cancel`
                `))
             }
 
+            if (command === 'tv') {
+                if (!args.length) {
+                    return message.channel.send(new MessageEmbed().setDescription(`Oops Wrong Argument.
+                    Use \`~movie help\` to see how to use commands
+                   `))
+                }
+                if (args[0].toLowerCase() === 'search') {
+                    
 
+                    args.shift();
+                    const query = args.join(" ") ;
+                    const { data } = await Axios.get(`https://api.themoviedb.org/3/search/tv?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1&query=${query}`)
+                    
+                    const movies = data.results;
+                    let content = '';
+                    if(!movies){
+                        return message.channel.send(`Sorry didn't found any matching result.`)
+                    }
+                    movies.forEach((movie,index)=>{
+                        content= content + `${index+1}. Name : **${movie.original_title ? movie.original_title :  movie.original_name}**,  ID: \`${movie.id}\`
+                        `
+                    })
+                    const info = new MessageEmbed()
+                        .setTitle('Results')
+                        .setDescription(`${content}
+                            
+                        use \`~tv details [id]\` to get details of one of the movie you searched`)
+
+
+                    return message.channel.send(info);
+
+
+
+                }
+                if (args[0].toLowerCase() === 'details') {
+                    
+
+                   
+                    const { data } = await Axios.get(`http://api.themoviedb.org/3/tv/${args[1]}?api_key=${process.env.MOVIE_API_KEY}`)
+                    const movie = data;
+
+                   
+                    const imageUrl = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2/${movie.poster_path}`;
+
+
+                    const info = new MessageEmbed()
+                        .setAuthor(movie.original_title ? movie.original_title : movie.original_name,'',movie.homepage)
+                        .setDescription(`Overview:
+                        ${movie.overview}`)
+                        .setImage(imageUrl)
+                        .addFields(
+                            { name: 'Vote', value: `${movie.vote_count}`, inline: true },
+                            { name: 'Average Rating', value: `${movie.vote_average}`, inline: true },
+                            { name: 'Popularity', value: `${movie.popularity}`, inline: true }
+                        )
+                        .addField('18+', movie.adult ? 'Yes' : 'No', true)
+                        .setFooter(`Release Date: ${movie.release_date ? movie.release_date : movie.first_air_date}`)
+
+
+                    return message.channel.send(info);
+
+                }
+                return message.channel.send(new MessageEmbed().setDescription(`Oops Wrong Argument.
+                Use \`~movie help\` to see how to use commands
+               `))
+            }
             else {
                 const msg = args.join(" ");
                 message.channel.send(`bantaba bot ko dictionary ma **${command} ${msg}** vanne sabda raina raixa`)
