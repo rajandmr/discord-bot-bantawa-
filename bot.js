@@ -1481,9 +1481,9 @@ you can react on right to create your character or wrong to cancel`
 
                 }
                 if (args[0].toLowerCase() === 'popular') {
-                    
 
-                   
+
+
                     const { data } = await Axios.get(`http://api.themoviedb.org/3/movie/popular?api_key=${process.env.MOVIE_API_KEY}`)
                     const randomNumber = Math.floor(Math.random() * 20);
                     const movie = data.results[args[1] <= 20 ? +args[1] - 1 : randomNumber];
@@ -1518,19 +1518,19 @@ you can react on right to create your character or wrong to cancel`
 
                 }
                 if (args[0].toLowerCase() === 'search') {
-                    
+
 
                     args.shift();
-                    const query = args.join(" ") ;
+                    const query = args.join(" ");
                     const { data } = await Axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1&query=${query}`)
-                    
+
                     const movies = data.results;
                     let content = '';
-                    if(!movies){
+                    if (!movies.length) {
                         return message.channel.send(`Sorry didn't found any matching result.`)
                     }
-                    movies.forEach((movie,index)=>{
-                        content= content + `${index+1}. Name : **${movie.original_title ? movie.original_title :  movie.original_name}**,  ID: \`${movie.id}\`
+                    movies.forEach((movie, index) => {
+                        content = content + `${index + 1}. Name : **${movie.original_title ? movie.original_title : movie.original_name}**,  ID: \`${movie.id}\`
                         `
                     })
                     const info = new MessageEmbed()
@@ -1544,18 +1544,18 @@ you can react on right to create your character or wrong to cancel`
 
                 }
                 if (args[0].toLowerCase() === 'details') {
-                    
 
-                   
+
+
                     const { data } = await Axios.get(`http://api.themoviedb.org/3/movie/${args[1]}?api_key=${process.env.MOVIE_API_KEY}`)
                     const movie = data;
 
-                   
+
                     const imageUrl = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2/${movie.poster_path}`;
 
 
                     const info = new MessageEmbed()
-                        .setAuthor(movie.original_title ? movie.original_title : movie.original_name,'',movie.homepage)
+                        .setAuthor(movie.original_title ? movie.original_title : movie.original_name, '', movie.homepage)
                         .setDescription(`Overview:
                         ${movie.overview}`)
                         .setImage(imageUrl)
@@ -1596,19 +1596,19 @@ you can react on right to create your character or wrong to cancel`
                    `))
                 }
                 if (args[0].toLowerCase() === 'search') {
-                    
+
 
                     args.shift();
-                    const query = args.join(" ") ;
+                    const query = args.join(" ");
                     const { data } = await Axios.get(`https://api.themoviedb.org/3/search/tv?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1&query=${query}`)
-                    
+
                     const movies = data.results;
                     let content = '';
-                    if(!movies){
+                    if (!movies.length) {
                         return message.channel.send(`Sorry didn't found any matching result.`)
                     }
-                    movies.forEach((movie,index)=>{
-                        content= content + `${index+1}. Name : **${movie.original_title ? movie.original_title :  movie.original_name}**,  ID: \`${movie.id}\`
+                    movies.forEach((movie, index) => {
+                        content = content + `${index + 1}. Name : **${movie.original_title ? movie.original_title : movie.original_name}**,  ID: \`${movie.id}\`
                         `
                     })
                     const info = new MessageEmbed()
@@ -1624,18 +1624,18 @@ you can react on right to create your character or wrong to cancel`
 
                 }
                 if (args[0].toLowerCase() === 'details') {
-                    
 
-                   
+
+
                     const { data } = await Axios.get(`http://api.themoviedb.org/3/tv/${args[1]}?api_key=${process.env.MOVIE_API_KEY}`)
                     const movie = data;
 
-                   
+
                     const imageUrl = `https://www.themoviedb.org/t/p/w600_and_h900_bestv2/${movie.poster_path}`;
 
 
                     const info = new MessageEmbed()
-                        .setAuthor(movie.original_title ? movie.original_title : movie.original_name,'',movie.homepage)
+                        .setAuthor(movie.original_title ? movie.original_title : movie.original_name, '', movie.homepage)
                         .setDescription(`Overview:
                         ${movie.overview}`)
                         .setImage(imageUrl)
@@ -1654,6 +1654,57 @@ you can react on right to create your character or wrong to cancel`
                 return message.channel.send(new MessageEmbed().setDescription(`Oops Wrong Argument.
                 Use \`~movie help\` to see how to use commands
                `))
+            }
+            if (command === 'meme') {
+                message.reply('Pls upload you image within 10 secs')
+                const id = message.author.id;
+                const filter = (m) => {
+                    return m.author.id === message.author.id
+                }
+                message.channel.awaitMessages(filter, { max: 1, time: 10000 }).then(collected => {
+                    if (collected.first().content === 'cancel') {
+                        return message.channel.send('canceled!!')
+                    }
+                    const attachment = collected.first();
+                    const memeImage = attachment.attachments.first().url
+                    message.channel.send('Type Top Text:')
+                    message.channel.awaitMessages(filter, { max: 1, time: 5000 }).then(
+                        e => {
+                            const TopText = e.first().content
+                            console.log(memeImage);
+                            console.log(TopText)
+                        }
+                    ).catch(e => { console.log(e) })
+                }).catch(e => console.log(e))
+
+
+            }
+            if (command === 'porn') {
+                if(!args.length) return message.channel.send('kasto porn herna manxa argument ni deuna yar sathi tme pani')
+                const {data} = await Axios.get(`https://adult-movie-provider.p.rapidapi.com/api/video/FindVideo`,
+                    {
+                        headers: {
+                            "x-rapidapi-key": process.env.RAPID_API_KEY,
+                            "x-rapidapi-host": "adult-movie-provider.p.rapidapi.com",
+                            "useQueryString": true
+                        },
+                        params: {
+                            "keyword": `${args.join(" ")}`,
+                            "offset": "0",
+                            "next": "10"
+
+                        }
+                    }
+                )
+                const randomNumber= Math.floor(Math.random()*10)
+                const video = data[randomNumber];
+                console.log(video);
+                const info = new MessageEmbed()
+                    .setAuthor(video.title,'',video.embed_url)
+                    .setImage(video.thumbs[0])
+                    .setThumbnail(video.thumbs[1])
+                return message.author.send(info)
+                
             }
             else {
                 const msg = args.join(" ");
