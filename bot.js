@@ -1661,27 +1661,81 @@ you can react on right to create your character or wrong to cancel`
                 const filter = (m) => {
                     return m.author.id === message.author.id
                 }
-                message.channel.awaitMessages(filter, { max: 1, time: 10000 }).then(collected => {
+                message.channel.awaitMessages(filter, { max: 1, time: 40000 }).then(collected => {
                     if (collected.first().content === 'cancel') {
                         return message.channel.send('canceled!!')
                     }
                     const attachment = collected.first();
                     const memeImage = attachment.attachments.first().url
+                    const height = attachment.attachments.first().height;
+                    const width = attachment.attachments.first().width;
                     message.channel.send('Type Top Text:')
-                    message.channel.awaitMessages(filter, { max: 1, time: 5000 }).then(
+                    message.channel.awaitMessages(filter, { max: 1, time: 30000 }).then(
                         e => {
-                            const TopText = e.first().content
-                            console.log(memeImage);
-                            console.log(TopText)
+                            const TopText = e.first().content;
+                            if (TopText === 'cancel') {
+                                return message.channel.send('Canceled!!');
+                            }
+
+                            message.channel.send('Type Bottom Text: (Type **skip** if you dont want bottom text)')
+                            message.channel.awaitMessages(filter, { max: 1, time: 20000 }).then(
+                                async (s) => {
+                                    const BottomText = s.first().content;
+                                    if (BottomText === 'cancel') {
+                                        return message.channel.send('Canceled!!');
+                                    }
+                                    
+                                    const canvas = Canvas.createCanvas(800, BottomText.toLowerCase()==='skip'?746:946);
+                                    const ctx = canvas.getContext('2d');
+                                    const background = await Canvas.loadImage('https://t3.ftcdn.net/jpg/02/32/74/34/360_F_232743479_Zzil5APYDHoBrUk7qfH7eYyq5KW0nV0C.jpg');
+                                    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+                                    ctx.strokeStyle = '#74037b';
+
+                                    ctx.font = '60px sans-serif';
+                                    // Select the style that will be used to fill the text in
+                                    ctx.fillStyle = '#2b2b28';
+
+                                    const memeurl = await Canvas.loadImage(memeImage);
+                                    ctx.drawImage(memeurl, 0, 200, 800, 546);
+                                    let TopText1 = TopText;
+                                    let TopText2 = ''
+                                    if (TopText.length > 25) {
+                                        const textArray = TopText.split(' ');
+                                        
+                                        TopText1 = textArray.splice(0, 5).join(" ");
+                                        
+                                        TopText2 = textArray.join(" ");
+
+                                    }
+                                    let BottomText1 = BottomText;
+                                    let BottomText2 = ''
+                                    if (TopText.length > 25) {
+                                        const textArray = BottomText.split(' ');
+                                        
+                                        BottomText1 = textArray.splice(0, 5).join(" ");
+                                        
+                                        BottomText2 = textArray.join(" ");
+
+                                    }
+                                    ctx.fillText(TopText1, 30, 80);
+                                    ctx.fillText(TopText2, 30, 160);
+                                    ctx.fillText(BottomText1, 30, 820);
+                                    ctx.fillText(BottomText2, 30, 900);
+                                    const newAttachment = new MessageAttachment(canvas.toBuffer(), 'meme.png');
+
+
+                                    return message.channel.send(newAttachment);
+                                }
+                            ).catch(e => console.log(e))
                         }
                     ).catch(e => { console.log(e) })
                 }).catch(e => console.log(e))
-
+                return;
 
             }
             if (command === 'porn') {
-                if(!args.length) return message.channel.send('kasto porn herna manxa argument ni deuna yar sathi tme pani')
-                const {data} = await Axios.get(`https://adult-movie-provider.p.rapidapi.com/api/video/FindVideo`,
+                if (!args.length) return message.channel.send('kasto porn herna manxa argument ni deuna yar sathi tme pani')
+                const { data } = await Axios.get(`https://adult-movie-provider.p.rapidapi.com/api/video/FindVideo`,
                     {
                         headers: {
                             "x-rapidapi-key": process.env.RAPID_API_KEY,
@@ -1696,15 +1750,15 @@ you can react on right to create your character or wrong to cancel`
                         }
                     }
                 )
-                const randomNumber= Math.floor(Math.random()*10)
+                const randomNumber = Math.floor(Math.random() * 10)
                 const video = data[randomNumber];
                 console.log(video);
                 const info = new MessageEmbed()
-                    .setAuthor(video.title,'',video.embed_url)
+                    .setAuthor(video.title, '', video.embed_url)
                     .setImage(video.thumbs[0])
                     .setThumbnail(video.thumbs[1])
                 return message.author.send(info)
-                
+
             }
             else {
                 const msg = args.join(" ");
@@ -1740,6 +1794,9 @@ client.on('guildMemberAdd', (member) => {
 
 
 })
+
+
+
 
 
 const applyText = (canvas, text) => {
