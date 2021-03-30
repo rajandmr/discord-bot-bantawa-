@@ -206,7 +206,7 @@ client.on('message', async (message) => {
                                 return message.channel.send(` :cocktail: It's **Tails** You Lost **$${amount}** `)
                             }
                         } else {
-                            return message.channel.send('Garib raixau sathi tme ta')
+                            return message.channel.send('You are too poor.')
                         }
                     }
 
@@ -233,7 +233,7 @@ client.on('message', async (message) => {
                                 return message.channel.send(` :cocktail: It's **Tails** You Won **$${amount}** `)
                             }
                         } else {
-                            return message.channel.send('Garib raixau sathi tme ta')
+                            return message.channel.send('You are too poor.')
                         }
                     }
                 }
@@ -256,13 +256,13 @@ client.on('message', async (message) => {
                             return message.channel.send(` :cocktail: It's **Tails** You Lost **$${amount}** `)
                         }
                     } else {
-                        return message.channel.send('Garib raixau sathi tme ta')
+                        return message.channel.send('You are too poor.')
                     }
 
 
                 }
                 else {
-                    return message.channel.send('0 - 1million matra gamble gara sathi tyo vanda dherei pani hiana thorei pani haina')
+                    return message.channel.send('0 - 1million is the range for gambling')
                 }
 
             }
@@ -282,48 +282,43 @@ client.on('message', async (message) => {
                     const Tag = message.author.tag;
                     const UserId = message.author.id;
                     const Name = args.join(" ").toLowerCase();
-                    let msg = `>>> your character name is **${Name}**
-your **Race** will be selected as random.
-you can react on right to create your character or wrong to cancel`
+                    const info = new MessageEmbed().setDescription(
+                        `>>> Your character name is ** ${Name}**.
+                        Your **Race** will be selected as Random.
+                         React to confirm.`
+                    )
 
-                    message.channel.send(msg).then(message => {
-                        message.react('✅')
-                        message.react('❎');
-                        client.on('messageReactionAdd', (reaction, user) => {
-                            if (user.bot) {
-                                return
-                            }
-                            if (reaction.emoji.name === '✅') {
-                                if (user.id === UserId) {
+                    message.channel.send(info).then((msg) => {
+                        msg.react('✅').then(() => msg.react('❎'));
+                        const filter = (reaction, user) => {
+                            console.log(user);
+                            return ['✅', '❎'].includes(reaction.emoji.name) && user.id === message.author.id;
+                        };
+    
+                        msg.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
+                            .then(async(collected) => {
+                                const reaction = collected.first();
+    
+                                if (reaction.emoji.name === '✅') {
                                     const newProfile = new ProfileModel({});
                                     newProfile.Name = Name;
                                     newProfile.UserId = UserId;
                                     newProfile.Tag = Tag;
                                     newProfile.UserName = Username;
-                                    newProfile.Race = 'KothiWala'
-                                    newProfile.save((err, saved) => {
-                                        if (err) {
-                                            message.delete()
-                                            return message.channel.send('database ma rakhnu ma kharabi aayo paxi try garnu hola')
-                                        } else {
-                                            message.delete()
-                                            return message.channel.send(`aja dekhi tmro name ${Name} yaad rakha natra ***bantaba profile*** garera hera`)
-                                        }
-
-                                    })
+                                    const randomNumber = Math.floor(Math.random()*3)
+                                    newProfile.Race = require('./race')[randomNumber];
+                                    const saved = await newProfile.save();
+                                    return message.channel.send(`Your character **${saved.Name}** has been successfully created. Use ***~profile*** to view your profile`)
+                                } else {
+                                    return message.channel.send('You profile creation is cancelled. You can create it at anytime you want. Hope to see you soon.');
                                 }
-                            }
-
-
-                            if (reaction.emoji.name === '❎') {
-                                if (user.id === UserId) {
-                                    message.delete()
-                                    return message.channel.send('arko pali banau hai dost aile lai nabanayeni')
-                                }
-                            }
-                        })
+                            })
+                            .catch(e =>
+                                console.log(e)
+                            );
+    
                     })
-
+                  
                     return;
                 }
 
@@ -353,7 +348,7 @@ you can react on right to create your character or wrong to cancel`
             if (command === 'profile') {
                 const profile = await ProfileModel.find({ Tag: message.author.tag });
                 if (!profile[0]) {
-                    return message.channel.send('character banau suruma use ***bantaba create <name>***')
+                    return message.channel.send('Create character first. Use ***~create <name>***')
                 }
                 const canvas = Canvas.createCanvas(800, 740);
 
@@ -409,7 +404,7 @@ you can react on right to create your character or wrong to cancel`
             }
 
             if (command === 'edit') {
-                if (!args.length) return message.channel.send('newName ni deu sathi chado');
+                if (!args.length) return message.channel.send('Name is required.');
                 ProfileModel.findOne({
                     Tag: message.author.tag
                 }).exec().then(profile => {
@@ -426,7 +421,7 @@ you can react on right to create your character or wrong to cancel`
                             }
                         })
                     } else {
-                        return message.channel.send('xaina profile nai k ko edit hau')
+                        return message.channel.send('Create character first. Use ***~create <name>***')
                     }
                 }).catch(e => console.log(e))
             }
@@ -437,6 +432,9 @@ you can react on right to create your character or wrong to cancel`
                 }
                 const url = args.join(" ");
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                if(!user){
+                    return message.channel.send('Create character first. Use ***~create <name>***')
+                }
                 if (await isImageURL(url)) {
                     if (user) {
                         user.ImageUrl = url
@@ -480,13 +478,16 @@ you can react on right to create your character or wrong to cancel`
                 }
                 if (args[0] === 'match') {
                     const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                    if(!user){
+                        return message.channel.send('Create character first. Use ***~create <name>***')
+                    }
                     if (!user.SteamID) {
-                        return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
+                        return message.channel.send('Set you steam id first. use *** ~steam <id>***')
                     }
                     const id = user.SteamID;
                     args.shift();
                     if (!args.length) {
-                        return message.channel.send('number xutexa numbber deu 1 to 100 samma matra')
+                        return message.channel.send('give a number as well. For instance, 1 to see your latest match 2 and so on')
                     }
                     const matchNumber = args[0];
                     if (matchNumber >= 1 && matchNumber <= 10000) {
@@ -594,7 +595,7 @@ you can react on right to create your character or wrong to cancel`
                         }
                     })
                     if (!heroId) {
-                        return message.channel.send('hero ko name milena jasto xa feri try')
+                        return message.channel.send('heroname is probably not righ try again')
                     }
 
                     const matches = [];
@@ -607,12 +608,12 @@ you can react on right to create your character or wrong to cancel`
                         };
                     })
                     if (!matches.length) {
-                        return message.channel.send('vetiyena yar game dherei purano raixa')
+                        return message.channel.send('Cant find the game. Sorry')
                     }
 
                     const stat = matches[matchNumber - 1];
                     if (!stat) {
-                        return message.channel.send('purano raixa match vetiyena')
+                        return message.channel.send('Cannot find the game. Sorry')
                     }
 
                     user.MatchID = stat.match_id;
@@ -719,7 +720,7 @@ you can react on right to create your character or wrong to cancel`
             if (command === 'steam') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
                 if (user.SteamID) {
-                    return message.channel.send('yo ek choti matra hannne command ho tmro steam id already xa change garne vaye contact Deepak Shrestha')
+                    return message.channel.send('Seems like you already have registerd your steam id. Unfortunately we donot have the feature to change this but you can contact us here: https://discord.gg/MdSBunUH if you want to change it')
                 }
                 const steamId = args.join(" ");
                 user.SteamID = steamId;
@@ -837,6 +838,9 @@ you can react on right to create your character or wrong to cancel`
             }
             if (command === 'addxp') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                if(!user){
+                    return message.channel.send('Create character first use `~create [characterName]`')
+                }
                 const id = user.SteamID;
                 const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
                 let earnedXP = 0;
@@ -1171,7 +1175,7 @@ you can react on right to create your character or wrong to cancel`
             if (command === 'boosters') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
                 if (!user) {
-                    return message.channel.send('character banau suruma, user ***bantaba create <character>***')
+                    return message.channel.send('create character first use ***~create <character>***')
                 }
                 let charmCount = 0;
                 let blackMoleCount = 0;
@@ -1196,7 +1200,7 @@ you can react on right to create your character or wrong to cancel`
                 let msg = args.join(" ");
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
                 if (!user) {
-                    return message.channel.send('character banau suruma, user ***bantaba create <character>***')
+                    return message.channel.send('create character first use ***~create <character>***')
                 }
                 if (msg === '1') {
                     if (user.charm < 1) {
@@ -1348,7 +1352,9 @@ you can react on right to create your character or wrong to cancel`
         10.Check your overall win loss stats using \` ~dota2 wl \`
         11.Compare your xp with all the players using \` ~leaderboard \`
         12.Check how xp is being calculated after every game using \` ~formula \`
-        13.This is not everything there is but hope this sums up for now.
+        13.Purchase boosters from shop using \` ~shop \` to boost your experience gain.
+        14.\` ~movie help\` to see movie commands \` ~joke \` \` ~meme \` and many more.
+        15.This is not everything there is but hope this sums up for now.
         **Good Luck Have Fun** by BantabaBot`);
 
                 return message.channel.send(msg);
@@ -1592,7 +1598,7 @@ you can react on right to create your character or wrong to cancel`
             if (command === 'tv') {
                 if (!args.length) {
                     return message.channel.send(new MessageEmbed().setDescription(`Oops Wrong Argument.
-                    Use \`~movie help\` to see how to use commands
+                    Use \`~movie help\` to see how to use commands.
                    `))
                 }
                 if (args[0].toLowerCase() === 'search') {
@@ -1666,9 +1672,7 @@ you can react on right to create your character or wrong to cancel`
                         return message.channel.send('canceled!!')
                     }
                     const attachment = collected.first();
-                    const memeImage = attachment.attachments.first().url
-                    const height = attachment.attachments.first().height;
-                    const width = attachment.attachments.first().width;
+                    const memeImage = attachment.attachments.first().url;
                     message.channel.send('Type Top Text:')
                     message.channel.awaitMessages(filter, { max: 1, time: 30000 }).then(
                         e => {
@@ -1684,8 +1688,8 @@ you can react on right to create your character or wrong to cancel`
                                     if (BottomText === 'cancel') {
                                         return message.channel.send('Canceled!!');
                                     }
-                                    
-                                    const canvas = Canvas.createCanvas(800, BottomText.toLowerCase()==='skip'?746:946);
+
+                                    const canvas = Canvas.createCanvas(800, BottomText.toLowerCase() === 'skip' ? 746 : 946);
                                     const ctx = canvas.getContext('2d');
                                     const background = await Canvas.loadImage('https://t3.ftcdn.net/jpg/02/32/74/34/360_F_232743479_Zzil5APYDHoBrUk7qfH7eYyq5KW0nV0C.jpg');
                                     ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
@@ -1701,9 +1705,9 @@ you can react on right to create your character or wrong to cancel`
                                     let TopText2 = ''
                                     if (TopText.length > 25) {
                                         const textArray = TopText.split(' ');
-                                        
+
                                         TopText1 = textArray.splice(0, 5).join(" ");
-                                        
+
                                         TopText2 = textArray.join(" ");
 
                                     }
@@ -1711,9 +1715,9 @@ you can react on right to create your character or wrong to cancel`
                                     let BottomText2 = ''
                                     if (TopText.length > 25) {
                                         const textArray = BottomText.split(' ');
-                                        
+
                                         BottomText1 = textArray.splice(0, 5).join(" ");
-                                        
+
                                         BottomText2 = textArray.join(" ");
 
                                     }
@@ -1782,18 +1786,6 @@ you can react on right to create your character or wrong to cancel`
 
 
 
-
-client.on('guildMemberAdd', (member) => {
-    const channelId = '816676404879556621';
-    const channel = member.guild.channels.cache.get(channelId)
-
-    const message = `<@${member.id}> dost welcome welcome la aba ramailo garna parxa`;
-
-    channel.send(message);
-
-
-
-})
 
 
 
