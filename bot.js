@@ -294,18 +294,18 @@ client.on('message', async (message) => {
                             console.log(user);
                             return ['✅', '❎'].includes(reaction.emoji.name) && user.id === message.author.id;
                         };
-    
+
                         msg.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
-                            .then(async(collected) => {
+                            .then(async (collected) => {
                                 const reaction = collected.first();
-    
+
                                 if (reaction.emoji.name === '✅') {
                                     const newProfile = new ProfileModel({});
                                     newProfile.Name = Name;
                                     newProfile.UserId = UserId;
                                     newProfile.Tag = Tag;
                                     newProfile.UserName = Username;
-                                    const randomNumber = Math.floor(Math.random()*3)
+                                    const randomNumber = Math.floor(Math.random() * 3)
                                     newProfile.Race = require('./race')[randomNumber];
                                     const saved = await newProfile.save();
                                     return message.channel.send(`Your character **${saved.Name}** has been successfully created. Use ***~profile*** to view your profile`)
@@ -316,9 +316,9 @@ client.on('message', async (message) => {
                             .catch(e =>
                                 console.log(e)
                             );
-    
+
                     })
-                  
+
                     return;
                 }
 
@@ -432,7 +432,7 @@ client.on('message', async (message) => {
                 }
                 const url = args.join(" ");
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                if(!user){
+                if (!user) {
                     return message.channel.send('Create character first. Use ***~create <name>***')
                 }
                 if (await isImageURL(url)) {
@@ -478,7 +478,7 @@ client.on('message', async (message) => {
                 }
                 if (args[0] === 'match') {
                     const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                    if(!user){
+                    if (!user) {
                         return message.channel.send('Create character first. Use ***~create <name>***')
                     }
                     if (!user.SteamID) {
@@ -838,7 +838,7 @@ client.on('message', async (message) => {
             }
             if (command === 'addxp') {
                 const user = await ProfileModel.findOne({ Tag: message.author.tag });
-                if(!user){
+                if (!user) {
                     return message.channel.send('Create character first use `~create [characterName]`')
                 }
                 const id = user.SteamID;
@@ -1167,6 +1167,19 @@ client.on('message', async (message) => {
                         return message.channel.send('You are too poor to buy this.')
                     }
                 }
+                if (msg === 'all') {
+                    if (user.Gold >= 2800) {
+                        user.kdaReducer ? user.kdaReducer = user.kdaReducer + 1: user.kdaReducer = 1;
+                        user.goblinFortune ? user.goblinFortune = user.goblinFortune + 1: user.goblinFortune = 1;
+                        user.charm ? user.charm = user.charm + 1: user.charm = 1;
+                        user.Gold = user.Gold - 2800;
+
+                        await user.save();
+                        return message.channel.send('You have succesfully purchased all boosters. Check using ***~boosters*** or activate using ***~activate all***')
+                    } else {
+                        return message.channel.send('You are too poor to buy this.')
+                    }
+                }
                 else {
                     return message.channel.send('Sorry, item numbers available are only 1,2,3 and 4')
                 }
@@ -1240,6 +1253,9 @@ client.on('message', async (message) => {
                 }
                 if (msg === '3') {
                     const chance = Math.floor(Math.random() * 3);
+                    if (user.blackMole < 1) {
+                        return message.channel.send('You dont have this type of booster. You need to buy it')
+                    }
                     user.blackMole = user.blackMole - 1;
                     if (chance === 1) {
                         if (user.charm) {
@@ -1269,12 +1285,46 @@ client.on('message', async (message) => {
                         return message.channel.send('Succesfully Activated. This will be automatically used on your next ***~addxp*** command')
                     }
                     if (user.activeKDA === 1) {
-                        return message.channel.send('You have already activated XP charm. You can activate another after it is consumed.')
+                        return message.channel.send('You have already activated KDA reducer. You can activate another after it is consumed.')
                     }
                     user.activeKDA = user.activeKDA + 1;
                     user.kdaReducer = user.kdaReducer - 1
                     await user.save();
                     return message.channel.send('Succesfully Activated. This will be automatically used on your next ***~addxp*** command')
+                }
+                if (msg === 'all') {
+                    if (user.kdaReducer < 1) {
+                        return message.channel.send('You dont have this type of booster. You need to buy it')
+                    }
+                    if (user.charm < 1) {
+                        return message.channel.send('You dont have this type of booster. You need to buy it')
+                    }
+                    if (user.goblinFortune < 1) {
+                        return message.channel.send('You dont have this type of booster. You need to buy it')
+                    }
+                    if (!user.activeKDA) {
+                        user.activeKDA = 1
+                        user.kdaReducer = user.kdaReducer - 1;
+                        await user.save();
+                        return message.channel.send('Succesfully Activated. This will be automatically used on your next ***~addxp*** command')
+                    }
+                    if (user.activeKDA === 1) {
+                        return message.channel.send('Looks like you already have some activated boosters. This will overwrite you booster. Pls confirm by reacting.')
+                    }
+                    if (user.activeCharm === 1) {
+                        return message.channel.send('Looks like you already have some activated boosters. This will overwrite you booster. Pls confirm by reacting.')
+                    }
+                    if (user.activeGoblin === 1) {
+                        return message.channel.send('Looks like you already have some activated boosters. This will overwrite you booster. Pls confirm by reacting.')
+                    }
+                    user.activeKDA = user.activeKDA + 1;
+                    user.kdaReducer = user.kdaReducer - 1;
+                    user.activeCharm = user.activeCharm + 1;
+                    user.charm = user.charm - 1;
+                    user.activeGoblin = user.activeGoblin + 1;
+                    user.goblinFortune = user.goblinFortune - 1;
+                    await user.save();
+                    return message.channel.send('Succesfully activated all boosters. This will be automatically used on your next ***~addxp*** command')
                 }
                 else {
                     return message.channel.send('Sorry, boosters available are only 1,2 or 3')
