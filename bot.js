@@ -1302,12 +1302,6 @@ client.on('message', async (message) => {
                     if (user.goblinFortune < 1) {
                         return message.channel.send('You dont have this type of booster. You need to buy it')
                     }
-                    if (!user.activeKDA) {
-                        user.activeKDA = 1
-                        user.kdaReducer = user.kdaReducer - 1;
-                        await user.save();
-                        return message.channel.send('Succesfully Activated. This will be automatically used on your next ***~addxp*** command')
-                    }
                     if (user.activeKDA === 1) {
                         return message.channel.send('Looks like you already have some activated boosters. This will overwrite you booster. Pls confirm by reacting.')
                     }
