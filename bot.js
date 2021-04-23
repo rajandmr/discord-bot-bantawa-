@@ -837,7 +837,7 @@ client.on('message', async (message) => {
                 return message.channel.send(richestPlayers)
             }
             if (command === 'addxp') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (!user) {
                     return message.channel.send('Create character first use `~create [characterName]`')
                 }
