@@ -122,6 +122,10 @@ client.on('message', async (message) => {
         return message.reply('hello')
     }
 
+    if(message.content.includes('lobby')){
+       return message.channel.send(`Hello <@${message.author.id}> sir, if you want any info about lobby games going on or maybe if u want to create one visit https://bantababot.vercel.app and navigate to lobby with bobby page`)
+    }
+
 
 
 
@@ -189,7 +193,7 @@ client.on('message', async (message) => {
                     const amount = Number(args.join(" "));
                     if (amount >= 0 && amount <= 1000000) {
 
-                        const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                        const user = await ProfileModel.findOne({ UserId: message.author.id });
                         if (!user) {
                             return message.channel.send('character banau suruma, user ***bantaba create <character>***')
                         }
@@ -216,7 +220,7 @@ client.on('message', async (message) => {
                     const amount = Number(args.join(" "));
                     if (amount >= 0 && amount <= 1000000) {
 
-                        const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                        const user = await ProfileModel.findOne({ UserId: message.author.id });
                         if (!user) {
                             return message.channel.send('character banau suruma, user ***bantaba create <character>***')
                         }
@@ -239,7 +243,7 @@ client.on('message', async (message) => {
                 }
                 else if (amount >= 0 && amount <= 1000000) {
 
-                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                    const user = await ProfileModel.findOne({ UserId: message.author.id });
                     if (!user) {
                         return message.channel.send('character banau suruma, user ***bantaba create <character>***')
                     }
@@ -273,7 +277,7 @@ client.on('message', async (message) => {
 
             if (command === 'create') {
                 if (!args.length) return message.channel.send('character ko name ni chaiyo');
-                const profile = await ProfileModel.findOne({ Tag: message.author.tag });
+                const profile = await ProfileModel.findOne({ UserId: message.author.id });
                 if (profile) {
                     return message.channel.send(`tmro character already raixa ta sathi **${profile.Name}** vanne. name edit garne vaye use ***bantaba edit <newName>*** `)
                 }
@@ -346,7 +350,7 @@ client.on('message', async (message) => {
 
 
             if (command === 'profile') {
-                const profile = await ProfileModel.find({ Tag: message.author.tag });
+                const profile = await ProfileModel.find({ UserId: message.author.id });
                 if (!profile[0]) {
                     return message.channel.send('Create character first. Use ***~create <name>***')
                 }
@@ -406,7 +410,7 @@ client.on('message', async (message) => {
             if (command === 'edit') {
                 if (!args.length) return message.channel.send('Name is required.');
                 ProfileModel.findOne({
-                    Tag: message.author.tag
+                    UserId: message.author.id
                 }).exec().then(profile => {
                     if (profile) {
                         const oldName = profile.Name;
@@ -431,7 +435,7 @@ client.on('message', async (message) => {
                     return message.channel.send('image ko url ni deu sathi')
                 }
                 const url = args.join(" ");
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (!user) {
                     return message.channel.send('Create character first. Use ***~create <name>***')
                 }
@@ -477,7 +481,7 @@ client.on('message', async (message) => {
                     return message.channel.send('type **bantaba dota2 match 1** type match 1 for latest game ani tespaxi ko game haru chaiyo vane match2 kita match 3 number badaudei jau')
                 }
                 if (args[0] === 'match') {
-                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                    const user = await ProfileModel.findOne({ UserId: message.author.id });
                     if (!user) {
                         return message.channel.send('Create character first. Use ***~create <name>***')
                     }
@@ -599,7 +603,7 @@ client.on('message', async (message) => {
                     }
 
                     const matches = [];
-                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                    const user = await ProfileModel.findOne({ UserId: message.author.id });
                     const id = user.SteamID;
                     const { data } = await Axios.get(`https://api.opendota.com/api/players/${id}/matches`);
                     data.forEach(match => {
@@ -677,7 +681,7 @@ client.on('message', async (message) => {
 
                 }
                 if (args[0] === 'wl') {
-                    const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                    const user = await ProfileModel.findOne({ UserId: message.author.id });
                     const id = user.SteamID;
                     const wl = await Axios.get(`https://api.opendota.com/api/players/${id}/wl`);
                     const profile = await Axios.get(`https://api.opendota.com/api/players/${id}`);
@@ -718,7 +722,7 @@ client.on('message', async (message) => {
                 return message.channel.send(exampleEmbed)
             }
             if (command === 'steam') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (user.SteamID) {
                     return message.channel.send('Seems like you already have registerd your steam id. Unfortunately we donot have the feature to change this but you can contact us here: https://discord.gg/MdSBunUH if you want to change it')
                 }
@@ -729,7 +733,7 @@ client.on('message', async (message) => {
             }
 
             if (command === 'mmr') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (!user.SteamID) {
                     return message.channel.send('steam id set gara suruma use *** bantaba steam <id>***')
                 }
@@ -755,7 +759,7 @@ client.on('message', async (message) => {
             }
 
             if (command === 'items') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (!user) {
                     return message.channel.send('suru ma match search gara ani balla tesko details dekhauxu ma')
                 }
@@ -811,13 +815,13 @@ client.on('message', async (message) => {
             }
 
             if (command === 'money') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 const gold = user.Gold;
 
                 return message.channel.send(`You currently have **$${gold}**, <@${message.author.id}>`)
             }
             if (command === 'economy') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 const gold = user.Gold;
 
                 return message.channel.send(`\`\`\`You currently have $${gold}\`\`\``)
@@ -837,7 +841,7 @@ client.on('message', async (message) => {
                 return message.channel.send(richestPlayers)
             }
             if (command === 'addxp') {
-                const user = await ProfileModel.findOne({ UserId: message.author.id });
+                const user = await ProfileModel.findOne({ UserId : message.author.id });
                 if (!user) {
                     return message.channel.send('Create character first use `~create [characterName]`')
                 }
@@ -1081,7 +1085,7 @@ client.on('message', async (message) => {
             }
 
             if (command === 'xp') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (!user) {
                     return message.channel.send('character banau suruma, user ***bantaba create <character>***')
                 }
@@ -1107,7 +1111,7 @@ client.on('message', async (message) => {
             }
             if (command === 'buy') {
                 let msg = args.join(" ");
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (!user) {
                     return message.channel.send('character banau suruma, user ***bantaba create <character>***')
                 }
@@ -1186,7 +1190,7 @@ client.on('message', async (message) => {
             }
 
             if (command === 'boosters') {
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (!user) {
                     return message.channel.send('create character first use ***~create <character>***')
                 }
@@ -1211,7 +1215,7 @@ client.on('message', async (message) => {
 
             if (command === 'activate') {
                 let msg = args.join(" ");
-                const user = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (!user) {
                     return message.channel.send('create character first use ***~create <character>***')
                 }
@@ -1331,7 +1335,7 @@ client.on('message', async (message) => {
                 }
                 if (args[1].includes('@')) {
                     const user2Id = args[1].replace(/[^\w\s]/gi, '');
-                    const user1 = await ProfileModel.findOne({ Tag: message.author.tag });
+                    const user1 = await ProfileModel.findOne({ UserId: message.author.id });
                     const user2 = await ProfileModel.findOne({ UserId: user2Id });
                     if (!user1) {
                         return message.channel.send('Yo do not have a character.')
@@ -1350,7 +1354,7 @@ client.on('message', async (message) => {
                     return message.channel.send(`<@${user2.UserId}> now has **$${user2.Gold}**, you now have **$${user1.Gold}**`)
                 }
                 const user2Name = args[1]
-                const user1 = await ProfileModel.findOne({ Tag: message.author.tag });
+                const user1 = await ProfileModel.findOne({ UserId: message.author.id });
                 const user2 = await ProfileModel.findOne({ Name: user2Name });
                 if (!user1) {
                     return message.channel.send('Yo do not have a character.')
