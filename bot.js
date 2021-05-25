@@ -108,7 +108,7 @@ client.on('message', async (message) => {
     }
     if (message.content === 'miracle miracle') {
         message.channel.send('ID: Nepdeathdust')
-        return message.channel.send('password: Deathdust007')
+        return message.channel.send('password: Deathdust202107')
     }
     if (message.content === 'ravi oad') {
         message.channel.send('ID: gyabihangrai3')
@@ -122,9 +122,7 @@ client.on('message', async (message) => {
         return message.reply('hello')
     }
 
-    if(message.content.includes('lobby')){
-       return message.channel.send(`Hello <@${message.author.id}> sir, if you want any info about lobby games going on or maybe if u want to create one visit https://bantababot.vercel.app and navigate to lobby with bobby page`)
-    }
+   
 
 
 
@@ -827,7 +825,7 @@ client.on('message', async (message) => {
                 return message.channel.send(`\`\`\`You currently have $${gold}\`\`\``)
             }
             if (command === 'richest') {
-                const users = await ProfileModel.find({}).sort({ Gold: -1 });
+                const users = await ProfileModel.find({}).sort({ Gold: -1 }).limit(10);
                 let msg = ''
                 users.forEach((user, index) => {
                     msg = msg + `${index + 1}. \`${user.Name}\`, a character by \`${user.Tag}\` with **$${user.Gold}**
@@ -835,7 +833,7 @@ client.on('message', async (message) => {
                 })
                 const richestPlayers = new MessageEmbed()
                     .setColor("#0af568")
-                    .setTitle("The Richest Players of bantabaRPG")
+                    .setTitle("The 10 Richest Players of bantabaRPG")
                     .setDescription(`${msg}`)
 
                 return message.channel.send(richestPlayers)
@@ -1054,7 +1052,7 @@ client.on('message', async (message) => {
             }
 
             if (command === 'leaderboard') {
-                const users = await ProfileModel.find({}).sort({ XP: -1 });
+                const users = await ProfileModel.find({}).sort({ XP: -1 }).limit(10);
                 let msg = ''
                 users.forEach((user, index) => {
                     msg = msg + `${index + 1}. \`${user.Name}\`, a character by \`${user.Tag}\` with total XP: **${user.XP}**, Level: **${user.Level}**
@@ -1062,7 +1060,7 @@ client.on('message', async (message) => {
                 })
                 const richestPlayers = new MessageEmbed()
                     .setColor("#11096e")
-                    .setTitle("Top Dota2 players of BantabaRPG")
+                    .setTitle("Top 10 Dota2 players of BantabaRPG")
                     .setDescription(`${msg}`)
 
                 return message.channel.send(richestPlayers)
