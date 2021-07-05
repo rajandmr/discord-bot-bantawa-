@@ -545,16 +545,28 @@ client.on('message', async (message) => {
                         } else {
                             partysize = `${stat.party_size} man party`
                         }
+
+
+
                         const lobby = stat.lobby_type;
                         const game = stat.game_mode;
                         const personaname = author.data.profile.personaname;
                         const avatar = author.data.profile.avatar;
+
+                        const output = await itemImageGenerate(stat.match_id,stat.hero_id);
+                        const attachment = output.attachment;
+                        const gpm = output.gpm;
+                        const xpm = output.xpm
+
                         const dota2stats = new MessageEmbed()
                             .setColor('#ad1005')
                             .setTitle('Dota 2')
                             .setAuthor(personaname, avatar)
-                            .setDescription(`Played as **${heroName}**`)
+                            .setDescription(`Played as **${heroName}**
 
+                            GPM : **${gpm}** , XPM : **${xpm}**`)
+                            .attachFiles(attachment)
+                            .setImage('attachment://item-image.png')
                             .addFields(
                                 { name: lobby_type[lobby].name, value: `${game_mode[game].name}` },
                                 { name: 'Team', value: `**${Team}** (${result})` },
@@ -570,8 +582,7 @@ client.on('message', async (message) => {
                             )
 
 
-
-                        return message.channel.send(dota2stats)
+                        return message.channel.send(dota2stats);
                     }
                     else {
                         return message.channel.send("recent 10000 ota game ko matra stat vanxu ma")
@@ -653,12 +664,19 @@ client.on('message', async (message) => {
                     const game = stat.game_mode;
                     const personaname = author.data.profile.personaname;
                     const avatar = author.data.profile.avatar;
-                    const dota2stats = new MessageEmbed()
-                        .setColor('#f5e56c')
+                    const output = await itemImageGenerate(stat.match_id,stat.hero_id);
+                        const attachment = output.attachment;
+                        const gpm = output.gpm;
+                        const xpm = output.xpm
+                        const dota2stats = new MessageEmbed()
+                        .setColor('#ad1005')
                         .setTitle('Dota 2')
                         .setAuthor(personaname, avatar)
-                        .setDescription(`Played as **${heroName}**`)
+                        .setDescription(`Played as **${heroName}**
 
+                        GPM : **${gpm}** , XPM : **${xpm}**`)
+                        .attachFiles(attachment)
+                        .setImage('attachment://item-image.png')
                         .addFields(
                             { name: lobby_type[lobby].name, value: `${game_mode[game].name}` },
                             { name: 'Team', value: `**${Team}** (${result})` },
@@ -672,7 +690,6 @@ client.on('message', async (message) => {
                             { name: 'Party type', value: partysize, inline: true },
                             { name: 'Leaver', value: stat.leaver_status ? 'leaver detected' : 'no leavers', inline: true }
                         )
-
 
 
                     return message.channel.send(dota2stats)
@@ -772,7 +789,8 @@ client.on('message', async (message) => {
                     }
                 })
 
-                const canvas = Canvas.createCanvas(225, 150);
+
+                const canvas = Canvas.createCanvas(225, 100);
                 const ctx = canvas.getContext('2d');
                 const background = await Canvas.loadImage('https://media.tarkett-image.com/large/TH_25094225_25187225_001.jpg');
                 ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
@@ -796,20 +814,12 @@ client.on('message', async (message) => {
                 const Item6 = await Canvas.loadImage(Item6Url);
                 ctx.drawImage(Item6, 150, 50, 75, 50);
 
-                const backpackItem1Url = getItemImage(playerInfo.backpack_0);
-                const backpackItem1 = await Canvas.loadImage(backpackItem1Url);
-                ctx.drawImage(backpackItem1, 0, 110, 75, 40);
-                const backpackItem2Url = getItemImage(playerInfo.backpack_1);
-                const backpackItem2 = await Canvas.loadImage(backpackItem2Url);
-                ctx.drawImage(backpackItem2, 75, 110, 75, 40);
-                const backpackItem3Url = getItemImage(playerInfo.backpack_2);
-                const backpackItem3 = await Canvas.loadImage(backpackItem3Url);
-                ctx.drawImage(backpackItem3, 150, 110, 75, 40);
 
 
                 const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
 
                 return message.channel.send(attachment);
+                
             }
 
             if (command === 'money') {
@@ -1783,6 +1793,18 @@ client.on('message', async (message) => {
                 return;
 
             }
+
+            if(command === 'test') {
+                const user = await ProfileModel.findOne({UserId: message.author.id})
+               
+    const embed = new MessageEmbed().setTitle('Items')
+        .attachFiles(attachment)
+        .setImage('attachment://item-image.png');
+
+   
+                
+
+            }
             if (command === 'porn') {
                 if (!args.length) return message.channel.send('kasto porn herna manxa argument ni deuna yar sathi tme pani')
                 const { data } = await Axios.get(`https://adult-movie-provider.p.rapidapi.com/api/video/FindVideo`,
@@ -1853,6 +1875,54 @@ const applyText = (canvas, text) => {
     return ctx.font;
 };
 
+const itemImageGenerate = async(MatchID,HeroID) => {
+
+    try{
+        const match = await Axios.get(`https://api.opendota.com/api/matches/${MatchID}`);
+    let playerInfo = {};
+    match.data.players.map(player => {
+        if (player.hero_id === HeroID) {
+            playerInfo = player;
+        }
+    })
+    const canvas = Canvas.createCanvas(225, 100);
+    const ctx = canvas.getContext('2d');
+    const background = await Canvas.loadImage('https://media.tarkett-image.com/large/TH_25094225_25187225_001.jpg');
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+    const Item1Url = getItemImage(playerInfo.item_0);
+    const Item1 = await Canvas.loadImage(Item1Url);
+    ctx.drawImage(Item1, 0, 0, 75, 50);
+    const Item2Url = getItemImage(playerInfo.item_1);
+    const Item2 = await Canvas.loadImage(Item2Url);
+    ctx.drawImage(Item2, 75, 0, 75, 50);
+    const Item3Url = getItemImage(playerInfo.item_2);
+    const Item3 = await Canvas.loadImage(Item3Url);
+    ctx.drawImage(Item3, 150, 0, 75, 50);
+    const Item4Url = getItemImage(playerInfo.item_3);
+    const Item4 = await Canvas.loadImage(Item4Url);
+    ctx.drawImage(Item4, 0, 50, 75, 50);
+    const Item5Url = getItemImage(playerInfo.item_4);
+    const Item5 = await Canvas.loadImage(Item5Url);
+    ctx.drawImage(Item5, 75, 50, 75, 50);
+    const Item6Url = getItemImage(playerInfo.item_5);
+    const Item6 = await Canvas.loadImage(Item6Url);
+    ctx.drawImage(Item6, 150, 50, 75, 50);
+
+
+
+    const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
+    return {
+        attachment,
+        gpm: playerInfo.benchmarks.gold_per_min.raw,
+        xpm: playerInfo.benchmarks.xp_per_min.raw
+    };
+    }catch(error){
+
+        console.log(error)
+    }
+    
+}
 
 
 // const getItemName = (itemId) => {
@@ -1915,6 +1985,7 @@ const getItemImage = (itemId) => {
     })
     return itemImage;
 }
+
 
 const levelUP = (earnedXP) => {
     let level = 0;
