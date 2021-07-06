@@ -1967,7 +1967,7 @@ const getAllItemImages = () => {
         newItem.shift();
         newItem = newItem.join("_");
 
-        obj.url = `http://cdn.dota2.com/apps/dota2/images/items/${newItem}_lg.png`;
+        obj.url =  `http://cdn.dota2.com/apps/dota2/images/items/${newItem}_lg.png`;
         obj.id = item.id;
         images.push(obj);
 
@@ -1976,7 +1976,7 @@ const getAllItemImages = () => {
 }
 
 const getItemImage = (itemId) => {
-    let itemImage = 'https://upload.wikimedia.org/wikipedia/commons/6/6a/A_blank_flag.png';
+    let itemImage = 'https://media.istockphoto.com/photos/dust-scratches-black-background-distressed-layer-picture-id1166511133?k=6&m=1166511133&s=612x612&w=0&h=HOqm_e4TyGaTyp33PwxOd359Myft9wmMiHDDi6dlm6o=';
     const dota_items = getAllItemImages();
     dota_items.map(item => {
         if (item.id === itemId) {
