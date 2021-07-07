@@ -24,6 +24,30 @@ const Axios = require('axios');
 
 
 
+client.on('voiceStateUpdate', async (oldState, newState) => {
+    try {
+        if (oldState.member.user.bot) return;
+
+        if(newState.member.user.id==='371719302795100170'){
+            const voiceChannel = newState.member.voice.channel;
+            if (voiceChannel) {
+                var connection = await voiceChannel.join();
+                const stream = ytdl('https://www.youtube.com/watch?v=YZv4ThXewA4', { filter: 'audioonly' });
+                connection.play(stream, { seek: 0, volume: 1 })
+                    .on('finish', () => {
+                        voiceChannel.leave();
+                    })
+    
+            }
+        }
+
+       
+    } catch (e) {
+        console.log(e)
+    }
+})
+
+
 
 client.on('ready', () => {
     console.log(`${client.user.username} has logged in`)
@@ -122,7 +146,7 @@ client.on('message', async (message) => {
         return message.reply('hello')
     }
 
-   
+
 
 
 
@@ -553,7 +577,7 @@ client.on('message', async (message) => {
                         const personaname = author.data.profile.personaname;
                         const avatar = author.data.profile.avatar;
 
-                        const output = await itemImageGenerate(stat.match_id,stat.hero_id);
+                        const output = await itemImageGenerate(stat.match_id, stat.hero_id);
                         const attachment = output.attachment;
                         const gpm = output.gpm;
                         const xpm = output.xpm
@@ -664,11 +688,11 @@ client.on('message', async (message) => {
                     const game = stat.game_mode;
                     const personaname = author.data.profile.personaname;
                     const avatar = author.data.profile.avatar;
-                    const output = await itemImageGenerate(stat.match_id,stat.hero_id);
-                        const attachment = output.attachment;
-                        const gpm = output.gpm;
-                        const xpm = output.xpm
-                        const dota2stats = new MessageEmbed()
+                    const output = await itemImageGenerate(stat.match_id, stat.hero_id);
+                    const attachment = output.attachment;
+                    const gpm = output.gpm;
+                    const xpm = output.xpm
+                    const dota2stats = new MessageEmbed()
                         .setColor('#ad1005')
                         .setTitle('Dota 2')
                         .setAuthor(personaname, avatar)
@@ -819,7 +843,7 @@ client.on('message', async (message) => {
                 const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
 
                 return message.channel.send(attachment);
-                
+
             }
 
             if (command === 'money') {
@@ -849,7 +873,7 @@ client.on('message', async (message) => {
                 return message.channel.send(richestPlayers)
             }
             if (command === 'addxp') {
-                const user = await ProfileModel.findOne({ UserId : message.author.id });
+                const user = await ProfileModel.findOne({ UserId: message.author.id });
                 if (!user) {
                     return message.channel.send('Create character first use `~create [characterName]`')
                 }
@@ -1181,9 +1205,9 @@ client.on('message', async (message) => {
                 }
                 if (msg === 'all') {
                     if (user.Gold >= 2800) {
-                        user.kdaReducer ? user.kdaReducer = user.kdaReducer + 1: user.kdaReducer = 1;
-                        user.goblinFortune ? user.goblinFortune = user.goblinFortune + 1: user.goblinFortune = 1;
-                        user.charm ? user.charm = user.charm + 1: user.charm = 1;
+                        user.kdaReducer ? user.kdaReducer = user.kdaReducer + 1 : user.kdaReducer = 1;
+                        user.goblinFortune ? user.goblinFortune = user.goblinFortune + 1 : user.goblinFortune = 1;
+                        user.charm ? user.charm = user.charm + 1 : user.charm = 1;
                         user.Gold = user.Gold - 2800;
 
                         await user.save();
@@ -1794,15 +1818,15 @@ client.on('message', async (message) => {
 
             }
 
-            if(command === 'test') {
-                const user = await ProfileModel.findOne({UserId: message.author.id})
-               
-    const embed = new MessageEmbed().setTitle('Items')
-        .attachFiles(attachment)
-        .setImage('attachment://item-image.png');
+            if (command === 'test') {
+                const user = await ProfileModel.findOne({ UserId: message.author.id })
 
-   
-                
+                const embed = new MessageEmbed().setTitle('Items')
+                    .attachFiles(attachment)
+                    .setImage('attachment://item-image.png');
+
+
+
 
             }
             if (command === 'porn') {
@@ -1875,53 +1899,53 @@ const applyText = (canvas, text) => {
     return ctx.font;
 };
 
-const itemImageGenerate = async(MatchID,HeroID) => {
+const itemImageGenerate = async (MatchID, HeroID) => {
 
-    try{
+    try {
         const match = await Axios.get(`https://api.opendota.com/api/matches/${MatchID}`);
-    let playerInfo = {};
-    match.data.players.map(player => {
-        if (player.hero_id === HeroID) {
-            playerInfo = player;
-        }
-    })
-    const canvas = Canvas.createCanvas(225, 100);
-    const ctx = canvas.getContext('2d');
-    const background = await Canvas.loadImage('https://media.tarkett-image.com/large/TH_25094225_25187225_001.jpg');
-    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+        let playerInfo = {};
+        match.data.players.map(player => {
+            if (player.hero_id === HeroID) {
+                playerInfo = player;
+            }
+        })
+        const canvas = Canvas.createCanvas(225, 100);
+        const ctx = canvas.getContext('2d');
+        const background = await Canvas.loadImage('https://media.tarkett-image.com/large/TH_25094225_25187225_001.jpg');
+        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-    const Item1Url = getItemImage(playerInfo.item_0);
-    const Item1 = await Canvas.loadImage(Item1Url);
-    ctx.drawImage(Item1, 0, 0, 75, 50);
-    const Item2Url = getItemImage(playerInfo.item_1);
-    const Item2 = await Canvas.loadImage(Item2Url);
-    ctx.drawImage(Item2, 75, 0, 75, 50);
-    const Item3Url = getItemImage(playerInfo.item_2);
-    const Item3 = await Canvas.loadImage(Item3Url);
-    ctx.drawImage(Item3, 150, 0, 75, 50);
-    const Item4Url = getItemImage(playerInfo.item_3);
-    const Item4 = await Canvas.loadImage(Item4Url);
-    ctx.drawImage(Item4, 0, 50, 75, 50);
-    const Item5Url = getItemImage(playerInfo.item_4);
-    const Item5 = await Canvas.loadImage(Item5Url);
-    ctx.drawImage(Item5, 75, 50, 75, 50);
-    const Item6Url = getItemImage(playerInfo.item_5);
-    const Item6 = await Canvas.loadImage(Item6Url);
-    ctx.drawImage(Item6, 150, 50, 75, 50);
+        const Item1Url = getItemImage(playerInfo.item_0);
+        const Item1 = await Canvas.loadImage(Item1Url);
+        ctx.drawImage(Item1, 0, 0, 75, 50);
+        const Item2Url = getItemImage(playerInfo.item_1);
+        const Item2 = await Canvas.loadImage(Item2Url);
+        ctx.drawImage(Item2, 75, 0, 75, 50);
+        const Item3Url = getItemImage(playerInfo.item_2);
+        const Item3 = await Canvas.loadImage(Item3Url);
+        ctx.drawImage(Item3, 150, 0, 75, 50);
+        const Item4Url = getItemImage(playerInfo.item_3);
+        const Item4 = await Canvas.loadImage(Item4Url);
+        ctx.drawImage(Item4, 0, 50, 75, 50);
+        const Item5Url = getItemImage(playerInfo.item_4);
+        const Item5 = await Canvas.loadImage(Item5Url);
+        ctx.drawImage(Item5, 75, 50, 75, 50);
+        const Item6Url = getItemImage(playerInfo.item_5);
+        const Item6 = await Canvas.loadImage(Item6Url);
+        ctx.drawImage(Item6, 150, 50, 75, 50);
 
 
 
-    const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
-    return {
-        attachment,
-        gpm: playerInfo.benchmarks.gold_per_min.raw,
-        xpm: playerInfo.benchmarks.xp_per_min.raw
-    };
-    }catch(error){
+        const attachment = new MessageAttachment(canvas.toBuffer(), 'item-image.png');
+        return {
+            attachment,
+            gpm: playerInfo.benchmarks.gold_per_min.raw,
+            xpm: playerInfo.benchmarks.xp_per_min.raw
+        };
+    } catch (error) {
 
         console.log(error)
     }
-    
+
 }
 
 
@@ -1967,7 +1991,7 @@ const getAllItemImages = () => {
         newItem.shift();
         newItem = newItem.join("_");
 
-        obj.url =  `http://cdn.dota2.com/apps/dota2/images/items/${newItem}_lg.png`;
+        obj.url = `http://cdn.dota2.com/apps/dota2/images/items/${newItem}_lg.png`;
         obj.id = item.id;
         images.push(obj);
 
