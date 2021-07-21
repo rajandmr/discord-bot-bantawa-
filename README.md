@@ -20,7 +20,7 @@
  
  ### `npm install` 
  
- ### `npm start`
+ ### `node bot.js`
  
   Runs the bot in development mode. 
   
