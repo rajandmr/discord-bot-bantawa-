@@ -16,7 +16,7 @@
  
  # Available Scripts
  
- In the project direcory, you run: 
+ In the project directory, you run: 
  
  ### `npm install` 
  
