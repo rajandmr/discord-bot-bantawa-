@@ -4,11 +4,14 @@ const moment = require('moment')
 const cheerio = require('cheerio');
 
 const ProfileModel = require('./model/profile')
+const Player = require('./model/player')
+
 
 const game_mode = require('./game_mode');
 const lobby_type = require('./lobby_type');
 const heroes = require('./heroes');
 const dota_items = require('./dota_items_old');
+
 
 
 const { Client, MessageAttachment, MessageEmbed } = require('discord.js');
@@ -28,7 +31,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     try {
         if (oldState.member.user.bot) return;
 
-        if(newState.member.user.id==='371719302795100170'){
+        if (newState.member.user.id === '371719302795100170') {
             const voiceChannel = newState.member.voice.channel;
             if (voiceChannel) {
                 var connection = await voiceChannel.join();
@@ -37,11 +40,11 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
                     .on('finish', () => {
                         voiceChannel.leave();
                     })
-    
+
             }
         }
 
-       
+
     } catch (e) {
         console.log(e)
     }
@@ -1855,6 +1858,175 @@ client.on('message', async (message) => {
                     .setThumbnail(video.thumbs[1])
                 return message.author.send(info)
 
+            }
+
+            if (command === 'scoreboard') {
+                const players = await Player.find({}).sort({games:-1})
+                players.sort((a, b) => {
+                    return b.wins - a.wins;
+                })
+                const playersInfo = []
+                for (const player of players) {
+                    const { data } = await axios.get(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${process.env.STEAM_API_KEY}&format=json&steamids=${player.steamID}`);
+                    const output = data.response.players[0];
+                    const playerInfo = {
+                        name: output.personaname,
+                        image: output.avatar,   
+                    }
+                    playersInfo.push(playerInfo)
+                }
+               
+                const canvas = Canvas.createCanvas(1210, 735);
+	            const ctx = canvas.getContext('2d');
+                const background = await Canvas.loadImage('./leaderboard.PNG');
+                ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+                ctx.fillStyle= '#fff'
+                ctx.font ='18px Comfortaa, Sans-serief'
+                // ctx.fillText(players[0].nickname,150,171)
+                // ctx.fillText(players[1].nickname,150,227)
+                // ctx.fillText(players[2].nickname,150,283)
+                // ctx.fillText(players[3].nickname,150,339)
+                // ctx.fillText(players[4].nickname,150,395)
+                // ctx.fillText(players[5].nickname,150,451)
+                // ctx.fillText(players[6].nickname,150,507)
+                // ctx.fillText(players[7].nickname,150,563)
+                // ctx.fillText(players[8].nickname,150,619)
+                // ctx.fillText(players[9].nickname,150,675)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[0].image),90,148)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[1].image),90,204)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[2].image),90,260)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[3].image),90,316)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[4].image),90,372)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[5].image),90,428)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[6].image),90,484)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[7].image),90,540)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[8].image),90,596)
+                ctx.drawImage(await Canvas.loadImage(playersInfo[9].image),90,652)
+                ctx.fillText(playersInfo[0].name,150,171)
+                ctx.fillText(playersInfo[1].name,150,227)
+                ctx.fillText(playersInfo[2].name,150,283)
+                ctx.fillText(playersInfo[3].name,150,339)
+                ctx.fillText(playersInfo[4].name,150,395)
+                ctx.fillText(playersInfo[5].name,150,451)
+                ctx.fillText(playersInfo[6].name,150,507)
+                ctx.fillText(playersInfo[7].name,150,563)
+                ctx.fillText(playersInfo[8].name,150,619)
+                ctx.fillText(playersInfo[9].name,150,675)
+                ctx.fillText(players[0].wins,355,171)
+                ctx.fillText(players[1].wins,355,227)
+                ctx.fillText(players[2].wins,355,283)
+                ctx.fillText(players[3].wins,355,339)
+                ctx.fillText(players[4].wins,355,395)
+                ctx.fillText(players[5].wins,355,451)
+                ctx.fillText(players[6].wins,355,507)
+                ctx.fillText(players[7].wins,355,563)
+                ctx.fillText(players[8].wins,355,619)
+                ctx.fillText(players[9].wins,355,675)
+                ctx.fillText(players[0].games-players[0].wins,515,171)
+                ctx.fillText(players[1].games-players[1].wins,515,227)
+                ctx.fillText(players[2].games-players[2].wins,515,283)
+                ctx.fillText(players[3].games-players[3].wins,515,339)
+                ctx.fillText(players[4].games-players[4].wins,515,395)
+                ctx.fillText(players[5].games-players[5].wins,515,451)
+                ctx.fillText(players[6].games-players[6].wins,515,507)
+                ctx.fillText(players[7].games-players[7].wins,515,563)
+                ctx.fillText(players[8].games-players[8].wins,515,619)
+                ctx.fillText(players[9].games-players[9].wins,515,675)
+                ctx.fillText(players[0].games,715,171)
+                ctx.fillText(players[1].games,715,227)
+                ctx.fillText(players[2].games,715,283)
+                ctx.fillText(players[3].games,715,339)
+                ctx.fillText(players[4].games,715,395)
+                ctx.fillText(players[5].games,715,451)
+                ctx.fillText(players[6].games,715,507)
+                ctx.fillText(players[7].games,715,563)
+                ctx.fillText(players[8].games,715,619)
+                ctx.fillText(players[9].games,715,675)
+                ctx.fillText(players[0].wins*3,1020,171)
+                ctx.fillText(players[1].wins*3,1020,227)
+                ctx.fillText(players[2].wins*3,1020,283)
+                ctx.fillText(players[3].wins*3,1020,339)
+                ctx.fillText(players[4].wins*3,1020,395)
+                ctx.fillText(players[5].wins*3,1020,451)
+                ctx.fillText(players[6].wins*3,1020,507)
+                ctx.fillText(players[7].wins*3,1020,563)
+                ctx.fillText(players[8].wins*3,1020,619)
+                ctx.fillText(players[9].wins*3,1020,675)
+                
+                const atch =  new MessageAttachment(canvas.toBuffer(),'leaderboard.png');
+                return message.channel.send(atch)
+                
+            }
+            
+            if (command === 'bantababoard') {
+                const players = await Player.find({}).sort({games:-1})
+                players.sort((a, b) => {
+                    return b.wins - a.wins;
+                })
+                
+                
+               
+                const canvas = Canvas.createCanvas(1210, 735);
+	            const ctx = canvas.getContext('2d');
+                const background = await Canvas.loadImage('./leaderboard.PNG');
+                ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+                ctx.fillStyle= '#fff'
+                ctx.font ='18px Comfortaa, Sans-serief'
+                ctx.fillText(players[0].nickname,150,171)
+                ctx.fillText(players[1].nickname,150,227)
+                ctx.fillText(players[2].nickname,150,283)
+                ctx.fillText(players[3].nickname,150,339)
+                ctx.fillText(players[4].nickname,150,395)
+                ctx.fillText(players[5].nickname,150,451)
+                ctx.fillText(players[6].nickname,150,507)
+                ctx.fillText(players[7].nickname,150,563)
+                ctx.fillText(players[8].nickname,150,619)
+                ctx.fillText(players[9].nickname,150,675)
+              
+                ctx.fillText(players[0].wins,355,171)
+                ctx.fillText(players[1].wins,355,227)
+                ctx.fillText(players[2].wins,355,283)
+                ctx.fillText(players[3].wins,355,339)
+                ctx.fillText(players[4].wins,355,395)
+                ctx.fillText(players[5].wins,355,451)
+                ctx.fillText(players[6].wins,355,507)
+                ctx.fillText(players[7].wins,355,563)
+                ctx.fillText(players[8].wins,355,619)
+                ctx.fillText(players[9].wins,355,675)
+                ctx.fillText(players[0].games-players[0].wins,515,171)
+                ctx.fillText(players[1].games-players[1].wins,515,227)
+                ctx.fillText(players[2].games-players[2].wins,515,283)
+                ctx.fillText(players[3].games-players[3].wins,515,339)
+                ctx.fillText(players[4].games-players[4].wins,515,395)
+                ctx.fillText(players[5].games-players[5].wins,515,451)
+                ctx.fillText(players[6].games-players[6].wins,515,507)
+                ctx.fillText(players[7].games-players[7].wins,515,563)
+                ctx.fillText(players[8].games-players[8].wins,515,619)
+                ctx.fillText(players[9].games-players[9].wins,515,675)
+                ctx.fillText(players[0].games,715,171)
+                ctx.fillText(players[1].games,715,227)
+                ctx.fillText(players[2].games,715,283)
+                ctx.fillText(players[3].games,715,339)
+                ctx.fillText(players[4].games,715,395)
+                ctx.fillText(players[5].games,715,451)
+                ctx.fillText(players[6].games,715,507)
+                ctx.fillText(players[7].games,715,563)
+                ctx.fillText(players[8].games,715,619)
+                ctx.fillText(players[9].games,715,675)
+                ctx.fillText(players[0].wins*3,1020,171)
+                ctx.fillText(players[1].wins*3,1020,227)
+                ctx.fillText(players[2].wins*3,1020,283)
+                ctx.fillText(players[3].wins*3,1020,339)
+                ctx.fillText(players[4].wins*3,1020,395)
+                ctx.fillText(players[5].wins*3,1020,451)
+                ctx.fillText(players[6].wins*3,1020,507)
+                ctx.fillText(players[7].wins*3,1020,563)
+                ctx.fillText(players[8].wins*3,1020,619)
+                ctx.fillText(players[9].wins*3,1020,675)
+                
+                const atch =  new MessageAttachment(canvas.toBuffer(),'leaderboard.png');
+                return message.channel.send(atch)
+                
             }
             else {
                 const msg = args.join(" ");
